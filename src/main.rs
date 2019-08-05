@@ -76,6 +76,8 @@ fn main() {
             .configure(|c| {
                 c.with_whitespace(true)
                     .on_mention(Some(bot_id))
+                    .no_dm_prefix(false)
+                    .case_insensitivity(false)
                     .prefix(
                         env::var("PREFIX")
                             .expect("A prefix must be configured.")
@@ -123,6 +125,13 @@ fn main() {
             .after(|_, _, command_name, error| match error {
                 Ok(()) => println!("Processed command '{}'", command_name),
                 Err(why) => println!("Command '{}' returned error {:?}", command_name, why),
+            })
+            .prefix_only(move |ctx, message| {
+                if let Some(user) = message.mentions.first() {
+                    if user.id == bot_id {
+                        message.channel_id.say(&ctx.http, &format!("The prefix is `{}`", env::var("PREFIX").unwrap())).ok();
+                    }
+                }
             })
             // Set a function that's called whenever an attempted command-call's
             // command could not be found.
