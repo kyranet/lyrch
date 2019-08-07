@@ -2,6 +2,7 @@ extern crate dotenv;
 extern crate serenity;
 
 mod commands;
+mod lib;
 
 use serenity::{
     client::bridge::gateway::ShardManager,
@@ -16,6 +17,7 @@ use std::{
 
 // This imports `typemap`'s `Key` as `TypeMapKey`.
 use serenity::prelude::*;
+use lib::settings::Settings;
 
 // A container type is created for inserting into the Client's `data`, which
 // allows for data to be accessible across all events and framework commands, or
@@ -46,12 +48,15 @@ fn main() {
 
     // Configure the client with your Discord bot token in the environment.
     let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
+    let settings = Settings::new();
+    settings.ensure_tables();
     let mut client = Client::new(&token, Handler).expect("Err creating client");
 
     {
         let mut data = client.data.write();
         data.insert::<CommandCounter>(HashMap::default());
         data.insert::<ShardManagerContainer>(Arc::clone(&client.shard_manager));
+        data.insert::<Settings>(settings);
     }
 
     // We will fetch your bot's owners and id
