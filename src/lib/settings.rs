@@ -1,9 +1,11 @@
 extern crate postgres;
+extern crate chrono;
 
 use serenity::model::prelude::UserId;
 use serenity::prelude::TypeMapKey;
 use std::env;
 use std::sync::{Arc, Mutex};
+use chrono::NaiveDateTime;
 // use std::time::{Duration, SystemTime};
 use postgres::{Connection, TlsMode};
 
@@ -130,20 +132,22 @@ impl Settings {
                 None
             } else {
                 let row = result.get(0);
-                let next_daily: i64 = row.get(9);
-                let next_reputation: i64 = row.get(10);
+                let color: i32 = row.get(5);
+                let money_count: i32 = row.get(6);
+                let point_count: i32 = row.get(7);
+                let reputation_count: i32 = row.get(8);
                 Some(UserSettings {
                     id,
                     banner_set: row.get(1),
                     banner_list: row.get(2),
                     badge_set: row.get(3),
                     badge_list: row.get(4),
-                    color: row.get(5),
-                    money_count: row.get(6),
-                    point_count: row.get(7),
-                    reputation_count: row.get(8),
-                    next_daily: next_daily as u64,
-                    next_reputation: next_reputation as u64,
+                    color: color as u32,
+                    money_count: money_count as u32,
+                    point_count: point_count as u32,
+                    reputation_count: reputation_count as u32,
+                    next_daily: row.get(9),
+                    next_reputation: row.get(10),
                 })
             }
         } else {
@@ -191,14 +195,14 @@ impl Settings {
 #[derive(Debug)]
 pub struct UserSettings {
     id: UserId,
-    banner_set: String,
-    banner_list: Vec<String>,
-    badge_set: Vec<String>,
-    badge_list: Vec<String>,
+    banner_set: Option<String>,
+    banner_list: Option<Vec<String>>,
+    badge_set: Option<Vec<String>>,
+    badge_list: Option<Vec<String>>,
     color: u32,
     money_count: u32,
     point_count: u32,
     reputation_count: u32,
-    next_daily: u64,
-    next_reputation: u64,
+    next_daily: Option<NaiveDateTime>,
+    next_reputation: Option<NaiveDateTime>,
 }
