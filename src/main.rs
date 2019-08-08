@@ -16,8 +16,8 @@ use std::{
 };
 
 // This imports `typemap`'s `Key` as `TypeMapKey`.
-use serenity::prelude::*;
 use lib::settings::Settings;
+use serenity::prelude::*;
 
 // A container type is created for inserting into the Client's `data`, which
 // allows for data to be accessible across all events and framework commands, or
@@ -117,6 +117,11 @@ fn main() {
                 // the command's name does not exist in the counter, add a default
                 // value of 0.
                 let mut data = ctx.data.write();
+                let stg = data.get::<Settings>().unwrap();
+                if let Some(user) = stg.retrieve_user(msg.author.id) {
+                    println!("User Data: {:?}", user);
+                }
+
                 let counter = data
                     .get_mut::<CommandCounter>()
                     .expect("Expected CommandCounter in ShareMap.");
@@ -134,7 +139,13 @@ fn main() {
             .prefix_only(move |ctx, message| {
                 if let Some(user) = message.mentions.first() {
                     if user.id == bot_id {
-                        message.channel_id.say(&ctx.http, &format!("The prefix is `{}`", env::var("PREFIX").unwrap())).ok();
+                        message
+                            .channel_id
+                            .say(
+                                &ctx.http,
+                                &format!("The prefix is `{}`", env::var("PREFIX").unwrap()),
+                            )
+                            .ok();
                     }
                 }
             })
@@ -166,9 +177,10 @@ fn main() {
             // The `group!` macro generates `static` instances of the options set for the group.
             // They're made in the pattern: `#name_GROUP` for the group instance and `#name_GROUP_OPTIONS`.
             // #name is turned all uppercase
-            .group(&commands::general::GENERAL_GROUP), // .group(&EMOJI_GROUP)
-                                                       // .group(&MATH_GROUP)
-                                                       // .group(&OWNER_GROUP)
+            .group(&commands::general::GENERAL_GROUP)
+            .group(&commands::social::SOCIAL_GROUP), // .group(&EMOJI_GROUP)
+                                                     // .group(&MATH_GROUP)
+                                                     // .group(&OWNER_GROUP)
     );
 
     if let Err(why) = client.start() {

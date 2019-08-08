@@ -86,5 +86,5 @@ pub fn my_help(
     groups: &[&'static CommandGroup],
     owners: HashSet<UserId>,
 ) -> CommandResult {
-	help_commands::plain(context, msg, args, help_options, groups, owners)
+    help_commands::plain(context, msg, args, help_options, groups, owners)
 }
