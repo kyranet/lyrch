@@ -1,4 +1,8 @@
+extern crate bit_vec;
+extern crate chrono;
 extern crate dotenv;
+extern crate postgres;
+extern crate serde_json;
 extern crate serenity;
 
 mod commands;
@@ -120,6 +124,11 @@ fn main() {
                 let stg = data.get::<Settings>().unwrap();
                 if let Some(user) = stg.retrieve_user(msg.author.id) {
                     println!("User Data: {:?}", user);
+                }
+                if let Some(guild_id) = msg.guild_id {
+                    if let Some(guild) = stg.retrieve_guild(guild_id) {
+                        println!("Guild Data: {:?}", guild);
+                    }
                 }
 
                 let counter = data
