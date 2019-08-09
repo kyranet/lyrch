@@ -58,7 +58,7 @@ impl EventHandler for Handler {
         &self,
         ctx: Context,
         incomplete: PartialGuild,
-        _full: Option<Arc<RwLock<Guild>>>
+        _full: Option<Arc<RwLock<Guild>>>,
     ) {
         let mut data = ctx.data.write();
         let settings = data.get_mut::<Settings>().unwrap();

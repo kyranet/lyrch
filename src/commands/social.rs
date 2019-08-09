@@ -23,9 +23,7 @@ pub fn daily(ctx: &mut Context, msg: &Message) -> CommandResult {
         Ok(()) => msg
             .channel_id
             .say(&ctx.http, "Yay! You received 200 shinies!"),
-        Err(err) => msg
-            .channel_id
-            .say(&ctx.http, format!("Whoops! Something happened! {}", err)),
+        Err(err) => msg.channel_id.say(&ctx.http, err),
     } {
         println!("Error sending message: {:?}", why);
     }

@@ -1,9 +1,9 @@
-use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
-use serenity::model::prelude::*;
 use bit_vec::BitVec;
 use postgres::Connection;
 use serde_json::from_value;
+use serenity::model::prelude::*;
+use std::collections::HashMap;
+use std::sync::{Arc, Mutex};
 
 pub struct GuildSettingsHandler(Arc<Mutex<Connection>>, HashMap<GuildId, GuildSettings>);
 

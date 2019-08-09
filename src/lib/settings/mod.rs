@@ -1,8 +1,8 @@
 pub mod guilds;
 pub mod users;
 
-use serenity::prelude::*;
 use postgres::{Connection, TlsMode};
+use serenity::prelude::*;
 use std::env;
 use std::sync::{Arc, Mutex};
 

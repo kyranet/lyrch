@@ -1,6 +1,7 @@
-use serenity::model::prelude::*;
 use chrono::prelude::*;
 use postgres::Connection;
+use serenity::model::prelude::*;
+use std::error::Error;
 use std::sync::{Arc, Mutex};
 
 pub struct UserSettingsHandler(Arc<Mutex<Connection>>);
@@ -89,57 +90,52 @@ impl UserSettingsHandler {
         }
     }
 
-    pub fn try_daily(&self, id: UserId) -> Result<(), &str> {
+    pub fn try_daily(&self, id: UserId) -> Result<(), String> {
+        let id = &(id.0 as i64);
         let connection = self.0.lock().unwrap();
-        if let Ok(result) = connection.query(
-            "SELECT next_daily FROM users WHERE id = $1",
-            &[&(id.0 as i64)],
-        ) {
-            // Create if not exists
-            if result.is_empty() {
-                return if try_daily_create(&connection, &(id.0 as i64)) {
-                    Ok(())
-                } else {
-                    Err("Failed to update database.")
-                };
-            }
+        let result = connection
+            .query("SELECT next_daily FROM users WHERE id = $1", &[id])
+            .map_err(|e| e.description().to_owned())?;
 
+        if result.is_empty() {
+            connection
+                .execute(
+                    "INSERT INTO users (id, money_count, next_daily)
+                VALUES ($1, $2, current_timestamp + interval '1 day')",
+                    &[id, &200i32],
+                )
+                .map_err(|e| e.description().to_owned())?;
+            Ok(())
+        } else {
             let row = result.get(0);
-            return if try_daily_update(&connection, &(id.0 as i64), row.get(0)) {
-                Ok(())
-            } else {
-                Err("You have claimed dailies too early.")
-            };
+            let next_daily: Option<NaiveDateTime> = row.get(0);
+            if let Some(time) = next_daily {
+                let remaining = time - Utc::now().naive_utc();
+                let seconds = remaining.num_seconds();
+                if seconds > 0 {
+                    let hours = remaining.num_hours();
+                    let minutes = remaining.num_minutes();
+                    return Err(format!(
+                        "On cooldown. Remaining time: {}:{}:{}",
+                        hours % 24,
+                        minutes % 60,
+                        seconds % 60
+                    )
+                    .to_owned());
+                }
+            }
+            connection
+                .execute(
+                    "UPDATE users
+                SET next_daily = current_timestamp + interval '1 day',
+                    money_count = money_count + $2
+                WHERE id = $1",
+                    &[id, &200i32],
+                )
+                .map_err(|e| e.description().to_owned())?;
+            Ok(())
         }
-        Err("The data retrieval from the database failed.")
     }
-}
-
-fn try_daily_create(connection: &Connection, id: &i64) -> bool {
-    connection
-        .execute(
-            "INSERT INTO users (id, money_count, next_daily)
-        VALUES ($1, $2, current_timestamp + interval '1 day')",
-            &[id, &200i32],
-        )
-        .is_ok()
-}
-
-fn try_daily_update(connection: &Connection, id: &i64, next_daily: Option<NaiveDateTime>) -> bool {
-    if let Some(time) = next_daily {
-        if time > Utc::now().naive_utc() {
-            return false;
-        }
-    }
-    connection
-        .execute(
-            "UPDATE users
-        SET next_daily = current_timestamp + interval '1 day',
-            money_count = money_count + $2
-        WHERE id = $1",
-            &[id, &200i32],
-        )
-        .is_ok()
 }
 
 #[derive(Debug)]
