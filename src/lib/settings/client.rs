@@ -25,16 +25,18 @@ impl ClientSettingsHandler {
 
     pub fn fetch(&self, id: UserId) -> Option<ClientSettings> {
         let connection = self.0.lock().unwrap();
-        if let Ok(result) = connection.query("SELECT * FROM clientStorage WHERE id = $1", &[&(id.0 as i64)])
-        {
+        if let Ok(result) = connection.query(
+            "SELECT * FROM clientStorage WHERE id = $1",
+            &[&(id.0 as i64)],
+        ) {
             if result.is_empty() {
                 None
             } else {
-								let row = result.get(0);
+                let row = result.get(0);
                 Some(ClientSettings {
                     id,
-										boosts_guild: row.get(1),
-										boosts_users: row.get(2)
+                    boosts_guild: row.get(1),
+                    boosts_users: row.get(2),
                 })
             }
         } else {
