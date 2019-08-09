@@ -8,6 +8,7 @@ extern crate serenity;
 mod commands;
 mod lib;
 
+use serenity::model::prelude::*;
 use serenity::{
     client::bridge::gateway::ShardManager,
     framework::standard::{DispatchError, StandardFramework},
@@ -44,6 +45,25 @@ impl EventHandler for Handler {
     fn ready(&self, _: Context, ready: Ready) {
         println!("{} is connected!", ready.user.name);
     }
+
+    fn guild_create(&self, ctx: Context, guild: Guild, _is_new: bool) {
+        let mut data = ctx.data.write();
+        let settings = data.get_mut::<Settings>().unwrap();
+        if let Some(guild_settings) = settings.guilds.fetch(guild.id) {
+            settings.guilds.add(guild_settings);
+        }
+    }
+
+    fn guild_delete(
+        &self,
+        ctx: Context,
+        incomplete: PartialGuild,
+        _full: Option<Arc<RwLock<Guild>>>
+    ) {
+        let mut data = ctx.data.write();
+        let settings = data.get_mut::<Settings>().unwrap();
+        settings.guilds.remove(incomplete.id);
+    }
 }
 
 fn main() {
@@ -53,7 +73,7 @@ fn main() {
     // Configure the client with your Discord bot token in the environment.
     let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
     let settings = Settings::new();
-    settings.ensure_tables();
+    settings.init();
     let mut client = Client::new(&token, Handler).expect("Err creating client");
 
     {
@@ -92,6 +112,17 @@ fn main() {
                             .expect("A prefix must be configured.")
                             .as_ref(),
                     )
+                    .dynamic_prefix(|ctx, msg| {
+                        if let Some(guild_id) = msg.guild_id {
+                            let data = ctx.data.write();
+                            let stg = data.get::<Settings>().unwrap();
+                            if let Some(guild) = stg.guilds.get(guild_id) {
+                                return guild.prefix.clone();
+                            }
+                        }
+
+                        None
+                    })
                     // You can set multiple delimiters via delimiters()
                     // or just one via delimiter(",")
                     // If you set multiple delimiters, the order you list them
@@ -122,11 +153,11 @@ fn main() {
                 // value of 0.
                 let mut data = ctx.data.write();
                 let stg = data.get::<Settings>().unwrap();
-                if let Some(user) = stg.retrieve_user(msg.author.id) {
+                if let Some(user) = stg.users.fetch(msg.author.id) {
                     println!("User Data: {:?}", user);
                 }
                 if let Some(guild_id) = msg.guild_id {
-                    if let Some(guild) = stg.retrieve_guild(guild_id) {
+                    if let Some(guild) = stg.guilds.fetch(guild_id) {
                         println!("Guild Data: {:?}", guild);
                     }
                 }

@@ -19,7 +19,7 @@ group!({
 pub fn daily(ctx: &mut Context, msg: &Message) -> CommandResult {
     let data = ctx.data.read();
     let settings = data.get::<Settings>().unwrap();
-    if let Err(why) = match settings.try_daily(msg.author.id) {
+    if let Err(why) = match settings.users.try_daily(msg.author.id) {
         Ok(()) => msg
             .channel_id
             .say(&ctx.http, "Yay! You received 200 shinies!"),
@@ -37,7 +37,7 @@ pub fn daily(ctx: &mut Context, msg: &Message) -> CommandResult {
 pub fn credits(ctx: &mut Context, msg: &Message) -> CommandResult {
     let data = ctx.data.read();
     let settings = data.get::<Settings>().unwrap();
-    let amount = settings.retrieve_user_money_count(msg.author.id);
+    let amount = settings.users.retrieve_user_money_count(msg.author.id);
     if let Err(why) = msg.channel_id.say(
         &ctx.http,
         format!(
