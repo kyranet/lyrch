@@ -16,7 +16,7 @@ impl ClientSettingsHandler {
                 "CREATE TABLE IF NOT EXISTS clientStorage (
                     id                  BIGINT PRIMARY KEY,
                     boosts_guild        BIGINT,
-		            boosts_users        BIGINT
+		    boosts_users        BIGINT
                 )",
                 &[],
             )
