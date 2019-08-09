@@ -1,7 +1,5 @@
-use chrono::prelude::*;
 use postgres::Connection;
 use serenity::model::prelude::*;
-use std::error::Error;
 use std::sync::{Arc, Mutex};
 
 pub struct ClientSettingsHandler(Arc<Mutex<Connection>>);
@@ -25,18 +23,19 @@ impl ClientSettingsHandler {
             .unwrap();
     }
 
-    ClientSettings> {
+    pub fn fetch(&self, id: UserId) -> Option<ClientSettings> {
         let connection = self.0.lock().unwrap();
         if let Ok(result) = connection.query("SELECT * FROM clientStorage WHERE id = $1", &[&(id.0 as i64)])
         {
             if result.is_empty() {
                 None
             } else {
-                ClientSettings {
+								let row = result.get(0);
+                Some(ClientSettings {
                     id,
 										boosts_guild: row.get(1),
 										boosts_users: row.get(2)
-                }
+                })
             }
         } else {
             None
@@ -45,7 +44,7 @@ impl ClientSettingsHandler {
 }
 
 #[derive(Debug)]
-ClientSettings {
+pub struct ClientSettings {
     pub id: UserId,
     pub boosts_guild: Option<i64>,
     pub boosts_users: Option<i64>,

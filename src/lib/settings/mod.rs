@@ -1,5 +1,6 @@
 pub mod guilds;
 pub mod users;
+pub mod client;
 
 use postgres::{Connection, TlsMode};
 use serenity::prelude::*;
@@ -10,6 +11,7 @@ pub struct Settings {
     pub connection: Arc<Mutex<Connection>>,
     pub guilds: guilds::GuildSettingsHandler,
     pub users: users::UserSettingsHandler,
+    pub client: client::ClientSettingsHandler,
 }
 
 impl TypeMapKey for Settings {
@@ -25,11 +27,13 @@ impl Settings {
             connection: connection.clone(),
             guilds: guilds::GuildSettingsHandler::new(connection.clone()),
             users: users::UserSettingsHandler::new(connection.clone()),
+            client: client::ClientSettingsHandler::new(connection.clone()),
         }
     }
 
     pub fn init(&self) {
         self.guilds.init();
         self.users.init();
+        self.client.init();
     }
 }
