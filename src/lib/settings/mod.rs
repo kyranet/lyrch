@@ -1,3 +1,4 @@
+pub mod clients;
 pub mod guilds;
 pub mod users;
 
@@ -10,6 +11,7 @@ pub struct Settings {
     pub connection: Arc<Mutex<Connection>>,
     pub guilds: guilds::GuildSettingsHandler,
     pub users: users::UserSettingsHandler,
+    pub clients: clients::ClientSettingsHandler,
 }
 
 impl TypeMapKey for Settings {
@@ -25,11 +27,13 @@ impl Settings {
             connection: connection.clone(),
             guilds: guilds::GuildSettingsHandler::new(connection.clone()),
             users: users::UserSettingsHandler::new(connection.clone()),
+            clients: clients::ClientSettingsHandler::new(connection.clone()),
         }
     }
 
     pub fn init(&self) {
         self.guilds.init();
         self.users.init();
+        self.clients.init();
     }
 }

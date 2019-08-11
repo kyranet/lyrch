@@ -142,7 +142,7 @@ fn main() {
             //
             // You can not use this to determine whether a command should be
             // executed. Instead, the `#[check]` macro gives you this functionality.
-            .before(|ctx, msg, command_name| {
+            .before(move |ctx, msg, command_name| {
                 println!(
                     "Got command '{}' by user '{}'",
                     command_name, msg.author.name
@@ -160,6 +160,9 @@ fn main() {
                     if let Some(guild) = stg.guilds.fetch(guild_id) {
                         println!("Guild Data: {:?}", guild);
                     }
+                }
+                if let Some(client) = stg.clients.fetch(bot_id) {
+                    println!("Client Data: {:?}", client);
                 }
 
                 let counter = data
