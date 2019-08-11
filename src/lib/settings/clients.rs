@@ -15,8 +15,8 @@ impl ClientSettingsHandler {
             .execute(
                 "CREATE TABLE IF NOT EXISTS clients (
                     id            BIGINT PRIMARY KEY,
-                    boosts_guild  BIGINT,
-                    boosts_users  BIGINT
+                    boosts_guild  BIGINT[]  DEFAULT '{}'::BIGINT[]  NOT NULL,
+                    boosts_users  BIGINT[]  DEFAULT '{}'::BIGINT[]  NOT NULL
                 )",
                 &[],
             )
@@ -48,6 +48,6 @@ impl ClientSettingsHandler {
 #[derive(Debug)]
 pub struct ClientSettings {
     pub id: UserId,
-    pub boosts_guild: Option<i64>,
-    pub boosts_users: Option<i64>,
+    pub boosts_guild: Vec<i64>,
+    pub boosts_users: Vec<i64>,
 }

@@ -162,7 +162,7 @@ fn main() {
                     }
                 }
                 if let Some(client) = stg.clients.fetch(bot_id) {
-                    println!("Guild Data: {:?}", client);
+                    println!("Client Data: {:?}", client);
                 }
 
                 let counter = data
