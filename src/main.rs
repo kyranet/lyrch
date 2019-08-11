@@ -161,7 +161,7 @@ fn main() {
                         println!("Guild Data: {:?}", guild);
                     }
                 }
-                if let Some(client) = stg.client.fetch(bot_id) {
+                if let Some(client) = stg.clients.fetch(bot_id) {
                     println!("Guild Data: {:?}", client);
                 }
 

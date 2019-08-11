@@ -13,10 +13,10 @@ impl ClientSettingsHandler {
         let connection = self.0.lock().unwrap();
         connection
             .execute(
-                "CREATE TABLE IF NOT EXISTS clientStorage (
-                    id                  BIGINT PRIMARY KEY,
-                    boosts_guild        BIGINT,
-		    boosts_users        BIGINT
+                "CREATE TABLE IF NOT EXISTS clients (
+                    id            BIGINT PRIMARY KEY,
+                    boosts_guild  BIGINT,
+                    boosts_users  BIGINT
                 )",
                 &[],
             )
@@ -26,7 +26,7 @@ impl ClientSettingsHandler {
     pub fn fetch(&self, id: UserId) -> Option<ClientSettings> {
         let connection = self.0.lock().unwrap();
         if let Ok(result) = connection.query(
-            "SELECT * FROM clientStorage WHERE id = $1",
+            "SELECT * FROM clients WHERE id = $1",
             &[&(id.0 as i64)],
         ) {
             if result.is_empty() {
