@@ -1,4 +1,5 @@
 pub mod event_handlers;
+pub mod resolvers;
 
 use std::iter::repeat;
 

@@ -1,9 +1,9 @@
 use crate::lib::settings::Settings;
-use crate::lib::util::percentage;
+use crate::lib::util::{percentage, resolvers::resolve_user};
 use serenity::{
     framework::standard::{
         macros::{command, group},
-        CommandResult,
+        Args, CommandResult,
     },
     model::channel::Message,
 };
@@ -51,8 +51,9 @@ pub fn credits(ctx: &mut Context, msg: &Message) -> CommandResult {
 }
 
 #[command]
+#[usage = "[user]"]
 #[bucket = "social.profile"]
-pub fn profile(ctx: &mut Context, msg: &Message) -> CommandResult {
+pub fn profile(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {
     let data = ctx.data.read();
     let settings = data.get::<Settings>().unwrap();
     let point_count: u32;
@@ -60,8 +61,9 @@ pub fn profile(ctx: &mut Context, msg: &Message) -> CommandResult {
     let level_previous: u32;
     let level_next: u32;
     let progress: f32;
+    let user_id = resolve_user(&ctx, &args).unwrap_or(msg.author.id);
 
-    if let Some(profile) = settings.users.fetch(msg.author.id) {
+    if let Some(profile) = settings.users.fetch(user_id) {
         point_count = profile.point_count;
         level = profile.get_level();
         level_previous = (level as f32 / 0.2).powf(2.0).floor() as u32;

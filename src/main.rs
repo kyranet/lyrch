@@ -2,8 +2,11 @@ extern crate bit_vec;
 extern crate chrono;
 extern crate dotenv;
 extern crate postgres;
+extern crate regex;
 extern crate serde_json;
 extern crate serenity;
+#[macro_use]
+extern crate lazy_static;
 
 mod commands;
 mod lib;
