@@ -155,6 +155,6 @@ pub struct UserSettings {
 
 impl UserSettings {
     pub fn get_level(&self) -> u32 {
-		(0.2 * (self.point_count as f32).sqrt()).floor() as u32
+        (0.2 * (self.point_count as f32).sqrt()).floor() as u32
     }
 }

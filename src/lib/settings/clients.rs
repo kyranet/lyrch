@@ -25,10 +25,9 @@ impl ClientSettingsHandler {
 
     pub fn fetch(&self, id: UserId) -> Option<ClientSettings> {
         let connection = self.0.lock().unwrap();
-        if let Ok(result) = connection.query(
-            "SELECT * FROM clients WHERE id = $1",
-            &[&(id.0 as i64)],
-        ) {
+        if let Ok(result) =
+            connection.query("SELECT * FROM clients WHERE id = $1", &[&(id.0 as i64)])
+        {
             if result.is_empty() {
                 None
             } else {

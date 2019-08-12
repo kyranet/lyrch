@@ -8,63 +8,10 @@ extern crate serenity;
 mod commands;
 mod lib;
 
-use serenity::model::prelude::*;
-use serenity::{
-    client::bridge::gateway::ShardManager,
-    framework::standard::{DispatchError, StandardFramework},
-    model::gateway::Ready,
-};
-use std::{
-    collections::{HashMap, HashSet},
-    env,
-    sync::Arc,
-};
+use serenity::framework::standard::{DispatchError, StandardFramework};
+use std::{collections::HashMap, env, sync::Arc};
 
-// This imports `typemap`'s `Key` as `TypeMapKey`.
-use lib::settings::Settings;
 use serenity::prelude::*;
-
-// A container type is created for inserting into the Client's `data`, which
-// allows for data to be accessible across all events and framework commands, or
-// anywhere else that has a copy of the `data` Arc.
-struct ShardManagerContainer;
-
-impl TypeMapKey for ShardManagerContainer {
-    type Value = Arc<Mutex<ShardManager>>;
-}
-
-struct CommandCounter;
-
-impl TypeMapKey for CommandCounter {
-    type Value = HashMap<String, u64>;
-}
-
-struct Handler;
-
-impl EventHandler for Handler {
-    fn ready(&self, _: Context, ready: Ready) {
-        println!("{} is connected!", ready.user.name);
-    }
-
-    fn guild_create(&self, ctx: Context, guild: Guild, _is_new: bool) {
-        let mut data = ctx.data.write();
-        let settings = data.get_mut::<Settings>().unwrap();
-        if let Some(guild_settings) = settings.guilds.fetch(guild.id) {
-            settings.guilds.add(guild_settings);
-        }
-    }
-
-    fn guild_delete(
-        &self,
-        ctx: Context,
-        incomplete: PartialGuild,
-        _full: Option<Arc<RwLock<Guild>>>,
-    ) {
-        let mut data = ctx.data.write();
-        let settings = data.get_mut::<Settings>().unwrap();
-        settings.guilds.remove(incomplete.id);
-    }
-}
 
 fn main() {
     // Run dotenv first.
@@ -72,76 +19,24 @@ fn main() {
 
     // Configure the client with your Discord bot token in the environment.
     let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
-    let settings = Settings::new();
+    let settings = lib::settings::Settings::new();
     settings.init();
-    let mut client = Client::new(&token, Handler).expect("Err creating client");
+    let mut client =
+        Client::new(&token, lib::util::event_handlers::Handler).expect("Err creating client");
 
     {
         let mut data = client.data.write();
-        data.insert::<CommandCounter>(HashMap::default());
-        data.insert::<ShardManagerContainer>(Arc::clone(&client.shard_manager));
-        data.insert::<Settings>(settings);
+        data.insert::<lib::core::CommandCounter>(HashMap::default());
+        data.insert::<lib::core::ShardManagerContainer>(Arc::clone(&client.shard_manager));
+        data.insert::<lib::settings::Settings>(settings);
     }
 
     // We will fetch your bot's owners and id
-    let (owners, bot_id) = match client.cache_and_http.http.get_current_application_info() {
-        Ok(info) => {
-            let mut owners = HashSet::new();
-            owners.insert(info.owner.id);
-
-            (owners, info.id)
-        }
-        Err(why) => panic!("Could not access application info: {:?}", why),
-    };
+    let (owners, bot_id) = lib::core::fetch_application_data(&client);
 
     client.with_framework(
-        // Configures the client, allowing for options to mutate how the
-        // framework functions.
-        //
-        // Refer to the documentation for
-        // `serenity::ext::framework::Configuration` for all available
-        // configurations.
         StandardFramework::new()
-            .configure(|c| {
-                c.with_whitespace(true)
-                    .on_mention(Some(bot_id))
-                    .no_dm_prefix(false)
-                    .case_insensitivity(false)
-                    .prefix(
-                        env::var("PREFIX")
-                            .expect("A prefix must be configured.")
-                            .as_ref(),
-                    )
-                    .dynamic_prefix(|ctx, msg| {
-                        if let Some(guild_id) = msg.guild_id {
-                            let data = ctx.data.write();
-                            let stg = data.get::<Settings>().unwrap();
-                            if let Some(guild) = stg.guilds.get(guild_id) {
-                                return guild.prefix.clone();
-                            }
-                        }
-
-                        None
-                    })
-                    // You can set multiple delimiters via delimiters()
-                    // or just one via delimiter(",")
-                    // If you set multiple delimiters, the order you list them
-                    // decides their priority (from first to last).
-                    //
-                    // In this case, if "," would be first, a message would never
-                    // be delimited at ", ", forcing you to trim your arguments if you
-                    // want to avoid whitespaces at the start of each.
-                    .delimiters(vec![", ", ",", " "])
-                    // Sets the bot's owners. These will be used for commands that
-                    // are owners only.
-                    .owners(owners)
-            })
-            // Set a function to be called prior to each command execution. This
-            // provides the context of the command, the message that was received,
-            // and the full name of the command that will be called.
-            //
-            // You can not use this to determine whether a command should be
-            // executed. Instead, the `#[check]` macro gives you this functionality.
+            .configure(|c| lib::core::configure(owners, bot_id, c))
             .before(move |ctx, msg, command_name| {
                 println!(
                     "Got command '{}' by user '{}'",
@@ -152,7 +47,7 @@ fn main() {
                 // the command's name does not exist in the counter, add a default
                 // value of 0.
                 let mut data = ctx.data.write();
-                let stg = data.get::<Settings>().unwrap();
+                let stg = data.get::<lib::settings::Settings>().unwrap();
                 if let Some(user) = stg.users.fetch(msg.author.id) {
                     println!("User Data: {:?}", user);
                 }
@@ -166,7 +61,7 @@ fn main() {
                 }
 
                 let counter = data
-                    .get_mut::<CommandCounter>()
+                    .get_mut::<lib::core::CommandCounter>()
                     .expect("Expected CommandCounter in ShareMap.");
                 let entry = counter.entry(command_name.to_string()).or_insert(0);
                 *entry += 1;
