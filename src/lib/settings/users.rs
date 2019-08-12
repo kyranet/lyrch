@@ -152,3 +152,9 @@ pub struct UserSettings {
     pub next_daily: Option<NaiveDateTime>,
     pub next_reputation: Option<NaiveDateTime>,
 }
+
+impl UserSettings {
+    pub fn get_level(&self) -> u32 {
+		(0.2 * (self.point_count as f32).sqrt()).floor() as u32
+    }
+}

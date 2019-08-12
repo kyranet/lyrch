@@ -1,4 +1,5 @@
 use crate::lib::settings::Settings;
+use crate::lib::util::percentage;
 use serenity::{
     framework::standard::{
         macros::{command, group},
@@ -12,7 +13,7 @@ use serenity::prelude::*;
 group!({
     name: "social",
     options: {},
-    commands: [daily, credits]
+    commands: [daily, credits, profile]
 });
 
 #[command]
@@ -46,5 +47,30 @@ pub fn credits(ctx: &mut Context, msg: &Message) -> CommandResult {
         println!("Error sending message: {:?}", why);
     }
 
+    Ok(())
+}
+
+#[command]
+#[bucket = "social.profile"]
+pub fn profile(ctx: &mut Context, msg: &Message) -> CommandResult {
+    let data = ctx.data.read();
+    let settings = data.get::<Settings>().unwrap();
+    if let Some(profile) = settings.users.fetch(msg.author.id) {
+        let level = profile.get_level();
+        let level_previous = (level as f32 / 0.2).powf(2.0).floor() as u32;
+		let level_next = ((level + 1) as f32 / 0.2).powf(2.0).floor() as u32;
+		let progress = (profile.point_count - level_previous) as f32 / (level_next - level_previous) as f32;
+
+        if let Err(why) = msg.channel_id.say(
+            &ctx.http,
+            format!(
+                "Progress: `[{}]`\nPoints: {}",
+                percentage(24, progress),
+                profile.point_count
+            )
+        ) {
+            println!("Error sending message: {:?}", why);
+        }
+    }
     Ok(())
 }
