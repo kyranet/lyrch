@@ -17,17 +17,17 @@ impl UserSettingsHandler {
         connection
             .execute(
                 "CREATE TABLE IF NOT EXISTS users (
-                    id                  BIGINT PRIMARY KEY,
-                    banner_set          VARCHAR(6),
-                    banner_list         VARCHAR(6)[],
-                    badge_set           VARCHAR(6)[],
-                    badge_list          VARCHAR(6)[],
-                    color               INTEGER DEFAULT 0,
-                    money_count         INTEGER DEFAULT 0,
-                    point_count         INTEGER DEFAULT 0,
-                    reputation_count    INTEGER DEFAULT 0,
-                    next_daily          TIMESTAMP,
-                    next_reputation     TIMESTAMP
+                    id                BIGINT PRIMARY KEY,
+                    banner_set        VARCHAR(6),
+                    banner_list       VARCHAR(6)[]  DEFAULT '{}'::VARCHAR(6)[]  NOT NULL,
+                    badge_set         VARCHAR(6)[]  DEFAULT '{}'::VARCHAR(6)[]  NOT NULL,
+                    badge_list        VARCHAR(6)[]  DEFAULT '{}'::VARCHAR(6)[]  NOT NULL,
+                    color             INTEGER       DEFAULT 0                   NOT NULL,
+                    money_count       INTEGER       DEFAULT 0                   NOT NULL,
+                    point_count       INTEGER       DEFAULT 0                   NOT NULL,
+                    reputation_count  INTEGER       DEFAULT 0                   NOT NULL,
+                    next_daily        TIMESTAMP,
+                    next_reputation   TIMESTAMP
                 )",
                 &[],
             )
@@ -35,7 +35,7 @@ impl UserSettingsHandler {
         connection
             .execute(
                 "CREATE INDEX IF NOT EXISTS points ON ONLY users (
-                    point_count         DESC
+                    point_count       DESC
                 )",
                 &[],
             )
@@ -136,8 +136,9 @@ impl UserSettingsHandler {
         if result.is_empty() {
             connection
                 .execute(
-                    "INSERT INTO users (id, money_count, next_daily)
-                VALUES ($1, $2, current_timestamp + interval '1 day')",
+                    "
+                    INSERT INTO users (id, money_count, next_daily)
+                    VALUES ($1, $2, current_timestamp + interval '1 day')",
                     &[id, &200i32],
                 )
                 .map_err(|e| e.description().to_owned())?;
@@ -162,10 +163,11 @@ impl UserSettingsHandler {
             }
             connection
                 .execute(
-                    "UPDATE users
-                SET next_daily = current_timestamp + interval '1 day',
-                    money_count = money_count + $2
-                WHERE id = $1",
+                    "
+                    UPDATE users
+                    SET next_daily = current_timestamp + interval '1 day',
+                        money_count = money_count + $2
+                    WHERE id = $1",
                     &[id, &200i32],
                 )
                 .map_err(|e| e.description().to_owned())?;
@@ -178,9 +180,9 @@ impl UserSettingsHandler {
 pub struct UserSettings {
     pub id: UserId,
     pub banner_set: Option<String>,
-    pub banner_list: Option<Vec<String>>,
-    pub badge_set: Option<Vec<String>>,
-    pub badge_list: Option<Vec<String>>,
+    pub banner_list: Vec<String>,
+    pub badge_set: Vec<String>,
+    pub badge_list: Vec<String>,
     pub color: u32,
     pub money_count: u32,
     pub point_count: u32,
