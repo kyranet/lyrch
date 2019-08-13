@@ -1,22 +1,13 @@
-use lazy_static;
-use regex::Regex;
-use serenity::{framework::standard::Args, model::prelude::*, prelude::*};
+use serenity::{framework::standard::Args, model::prelude::*, prelude::*, utils::parse_username};
 use std::sync::Arc;
 
 pub fn resolve_user(ctx: &Context, args: &Args) -> Option<Arc<RwLock<User>>> {
-    lazy_static! {
-        static ref REGEX_USER_ID: Regex = Regex::new(r"^<@!?(\d{17,18})>$").unwrap();
-    }
     if args.is_empty() {
         None
     } else if let Ok(parsed_user_id) = args.parse::<u64>() {
         resolve_user_id(ctx, parsed_user_id)
-    } else if let Some(captures) = REGEX_USER_ID.captures(args.current().unwrap()) {
-        if let Ok(parsed_user_id) = captures.get(1).unwrap().as_str().parse::<u64>() {
-            resolve_user_id(ctx, parsed_user_id)
-        } else {
-            None
-        }
+    } else if let Some(parsed_user_id) = parse_username(args.current().unwrap()) {
+        resolve_user_id(ctx, parsed_user_id)
     } else {
         None
     }
