@@ -61,7 +61,12 @@ pub fn profile(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {
     let level_previous: u32;
     let level_next: u32;
     let progress: f32;
-    let user_id = resolve_user(&ctx, &args).unwrap_or(msg.author.id);
+    let (user_name, user_id) = if let Some(user) = resolve_user(&ctx, &args) {
+        let user = user.read();
+        (user.name.clone(), user.id)
+    } else {
+        (msg.author.name.clone(), msg.author.id)
+    };
 
     if let Some(profile) = settings.users.fetch(user_id) {
         point_count = profile.point_count;
@@ -80,12 +85,13 @@ pub fn profile(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {
     if let Err(why) = msg.channel_id.say(
         &ctx.http,
         format!(
-            "**Level**: {level} | `{level_previous}..{point_count}..{level_next}` `[{progress}]`\n**Points**: {point_count}",
+            "[ {user_name} ] **Level**: {level} | `{level_previous}..{point_count}..{level_next}` `[{progress}]`",
             level = level,
             level_previous = level_previous,
             level_next = level_next,
             progress = percentage(35, progress),
-            point_count = point_count
+            point_count = point_count,
+            user_name = user_name
         )
     ) {
         println!("Error sending message: {:?}", why);
