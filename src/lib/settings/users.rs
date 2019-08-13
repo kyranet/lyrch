@@ -1,4 +1,5 @@
 use chrono::prelude::*;
+use postgres::types::ToSql;
 use postgres::Connection;
 use serenity::model::prelude::*;
 use std::error::Error;
@@ -70,6 +71,41 @@ impl UserSettingsHandler {
         } else {
             None
         }
+    }
+
+    // pub fn update(&self, id: UserId, key: &str, value: &ToSql) -> Result<(), postgres::Error> {
+    //     let connection = self.0.lock().unwrap();
+    //     connection.execute(
+    //         format!("
+    //             INSERT INTO users (id, {key})
+    //                 VALUES ($1, $2)
+    //             ON CONFLICT (id)
+    //             DO UPDATE SET {key} = $2;", key = key).as_str(),
+    //             &[value]
+    //     )?;
+    //     Ok(())
+    // }
+
+    pub fn update_increase(
+        &self,
+        id: UserId,
+        key: &str,
+        value: &ToSql,
+    ) -> Result<(), postgres::Error> {
+        let connection = self.0.lock().unwrap();
+        connection.execute(
+            format!(
+                "
+                INSERT INTO users (id, {key})
+                    VALUES ($1, $2)
+                ON CONFLICT (id)
+                DO UPDATE SET {key} = users.{key} + $2;",
+                key = key
+            )
+            .as_str(),
+            &[&(id.0 as i64), value],
+        )?;
+        Ok(())
     }
 
     pub fn retrieve_user_money_count(&self, id: UserId) -> u32 {

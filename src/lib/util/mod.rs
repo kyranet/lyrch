@@ -1,3 +1,4 @@
+pub mod bucket;
 pub mod event_handlers;
 pub mod resolvers;
 

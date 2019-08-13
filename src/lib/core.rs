@@ -46,30 +46,32 @@ pub fn create_framework(owners: HashSet<UserId>, bot_id: UserId) -> StandardFram
                 command_name, msg.author.name
             );
 
-            // Increment the number of times this command has been run once. If
-            // the command's name does not exist in the counter, add a default
-            // value of 0.
-            let mut data = ctx.data.write();
-            let stg = data.get::<lib::settings::Settings>().unwrap();
-            if let Some(user) = stg.users.fetch(msg.author.id) {
-                println!("User Data: {:?}", user);
-            }
-            if let Some(guild_id) = msg.guild_id {
-                if let Some(guild) = stg.guilds.fetch(guild_id) {
-                    println!("Guild Data: {:?}", guild);
-                }
-            }
-            if let Some(client) = stg.clients.fetch(bot_id) {
-                println!("Client Data: {:?}", client);
+            {
+                // Increment the number of times this command has been run once. If
+                // the command's name does not exist in the counter, add a default
+                // value of 0.
+                let mut data = ctx.data.write();
+                // let stg = data.get::<lib::settings::Settings>().unwrap();
+                // if let Some(user) = stg.users.fetch(msg.author.id) {
+                //     println!("User Data: {:?}", user);
+                // }
+                // if let Some(guild_id) = msg.guild_id {
+                //     if let Some(guild) = stg.guilds.fetch(guild_id) {
+                //         println!("Guild Data: {:?}", guild);
+                //     }
+                // }
+                // if let Some(client) = stg.clients.fetch(bot_id) {
+                //     println!("Client Data: {:?}", client);
+                // }
+
+                let counter = data
+                    .get_mut::<lib::core::CommandCounter>()
+                    .expect("Expected CommandCounter in ShareMap.");
+                let entry = counter.entry(command_name.to_string()).or_insert(0);
+                *entry += 1;
             }
 
-            let counter = data
-                .get_mut::<lib::core::CommandCounter>()
-                .expect("Expected CommandCounter in ShareMap.");
-            let entry = counter.entry(command_name.to_string()).or_insert(0);
-            *entry += 1;
-
-            true // if `before` returns false, command processing doesn't happen.
+            crate::monitors::run(ctx, msg)
         })
         // Similar to `before`, except will be called directly _after_
         // command execution.
@@ -96,8 +98,8 @@ pub fn create_framework(owners: HashSet<UserId>, bot_id: UserId) -> StandardFram
             println!("Could not find command named '{}'", unknown_command_name);
         })
         // Set a function that's called whenever a message is not a command.
-        .normal_message(|_, message| {
-            println!("Message is not a command '{}'", message.content);
+        .normal_message(|ctx, message| {
+            crate::monitors::run(ctx, message);
         })
         // Set a function that's called whenever a command's execution didn't complete for one
         // reason or another. For example, when a user has exceeded a rate-limit or a command

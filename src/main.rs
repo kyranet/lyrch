@@ -10,6 +10,7 @@ extern crate lazy_static;
 
 mod commands;
 mod lib;
+mod monitors;
 
 use lib::core::{create_framework, fetch_application_data, initialize_client};
 

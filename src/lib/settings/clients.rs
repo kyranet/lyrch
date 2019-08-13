@@ -23,6 +23,8 @@ impl ClientSettingsHandler {
             .unwrap();
     }
 
+    // TODO(kyranet): Use this
+    #[allow(dead_code)]
     pub fn fetch(&self, id: UserId) -> Option<ClientSettings> {
         let connection = self.0.lock().unwrap();
         if let Ok(result) =
