@@ -5,9 +5,9 @@ redistrubition of this code without permission is strictly forbidden.
 
 ## Development Requirements
 
-- [`Rust`] with [`rustfmt`] and [`rust-clippy`]
-- [`PostgreSQL`]
-- [`Redis`]
+- [`Rust`] with [`rustfmt`] and [`rust-clippy`]: To build, run, format, and lint the project.
+- [`PostgreSQL`]: To store persistent data.
+- [`Redis`]: To store cache data.
 
 [`Rust`]: https://www.rust-lang.org/tools/install
 [`rustfmt`]: https://github.com/rust-lang/rustfmt
@@ -40,5 +40,9 @@ clippy will be very slow, but afterwards it will run very, very, fast.
 
 ## NyProject Network
 
-- [`NeuLink`]: https://github.com/kyranet/neulink
-- [`Ryana`]: https://github.com/kyranet/ryana
+- [`NeuLink`]: Game Artificial Intelligence Server, used for game commands. Requires [`.NET Core 3.0`].
+- [`Ryana`]: Image Rendering Generation Server, used for image commands. Requires [`.NET Core 3.0`].
+
+[`NeuLink`]: https://github.com/kyranet/neulink
+[`Ryana`]: https://github.com/kyranet/ryana
+[`.NET Core 3.0`]: https://dotnet.microsoft.com/download/dotnet-core/3.0
