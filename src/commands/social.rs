@@ -9,8 +9,9 @@ use serenity::{
     },
     model::channel::Message,
 };
-
 use serenity::prelude::*;
+
+const SHINY: &'static str = "<:shiny:612364146792726539>";
 
 group!({
     name: "social",
@@ -27,13 +28,13 @@ pub fn daily(ctx: &mut Context, msg: &Message) -> CommandResult {
             ctx,
             msg,
             data.get_mut::<EditableMessages>().unwrap(),
-            "Yay! You received 200 shinies!"
+            "Yay! You received 200 {}!",
+            SHINY
         ),
         Err(err) => try_send_message_context!(
             ctx,
             msg,
             data.get_mut::<EditableMessages>().unwrap(),
-            "{}",
             err
         ),
     };
@@ -50,8 +51,9 @@ pub fn credits(ctx: &mut Context, msg: &Message) -> CommandResult {
         ctx,
         msg,
         data.get_mut::<EditableMessages>().unwrap(),
-        "You have a total of {}<:ShinyYellow:324157128270938113>",
-        amount
+        "You have a total of {} {}",
+        amount,
+        SHINY
     );
     Ok(())
 }
