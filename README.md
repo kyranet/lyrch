@@ -1,7 +1,7 @@
 # Lyrch
 
 This repository holds the private code for Experimental Skyra VI. Using, sharing, duplicating, or any other forms of
-redistrubition of this code without permission is strictly forbidden.
+redistribution of this code without permission is strictly forbidden.
 
 ## Development Requirements
 
