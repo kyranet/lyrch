@@ -25,6 +25,6 @@ macro_rules! send_message {
         }
     };
     ($ctx:expr, $msg:expr, $fmt:expr, $($args:tt)+) => {
-        send_message!($ctx, $msg, format!($fmt, format!($fmt, $($args)*)))
+        send_message!($ctx, $msg, format!($fmt, $($args)*))
     };
 }
