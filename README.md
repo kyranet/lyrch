@@ -32,7 +32,7 @@ $ cargo run
 $ cargo run --release
 ```
 
-Also, before pushing to the repository, please run `cargo fmt` (`rustup component add rustfmt`) and `cargo clippy`
+> **Note**: Before pushing to the repository, please run `cargo fmt` (`rustup component add rustfmt`) and `cargo clippy`
 (`rustup component add clippy`) so formatting stays consistent and there are no linter warnings. The first time you run
 clippy will be very slow, but afterwards it will run very, very, fast.
 
@@ -40,8 +40,10 @@ clippy will be very slow, but afterwards it will run very, very, fast.
 
 ## NyProject Network
 
-- [`NeuLink`]: Game Artificial Intelligence Server, used for game commands. Requires [`.NET Core 3.0`].
-- [`Ryana`]: Image Rendering Generation Server, used for image commands. Requires [`.NET Core 3.0`].
+- [`NeuLink`]: Game Artificial Intelligence Server, used for game commands, **this is not required for the basic set-up**.
+Requires [`.NET Core 3.0`].
+- [`Ryana`]: Image Rendering Generation Server, used for image commands, **this is not required for the basic set-up**.
+Requires [`.NET Core 3.0`].
 
 [`NeuLink`]: https://github.com/kyranet/neulink
 [`Ryana`]: https://github.com/kyranet/ryana
