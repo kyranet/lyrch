@@ -1,5 +1,7 @@
+use crate::lib::core::EditableMessages;
 use crate::lib::settings::Settings;
 use crate::lib::util::{percentage, resolvers::resolve_user};
+use crate::try_send_message_context;
 use serenity::{
     framework::standard::{
         macros::{command, group},
@@ -18,35 +20,39 @@ group!({
 
 #[command]
 pub fn daily(ctx: &mut Context, msg: &Message) -> CommandResult {
-    let data = ctx.data.read();
+    let mut data = ctx.data.write();
     let settings = data.get::<Settings>().unwrap();
-    if let Err(why) = match settings.users.try_daily(msg.author.id) {
-        Ok(()) => msg
-            .channel_id
-            .say(&ctx.http, "Yay! You received 200 shinies!"),
-        Err(err) => msg.channel_id.say(&ctx.http, err),
-    } {
-        println!("Error sending message: {:?}", why);
-    }
+    match settings.users.try_daily(msg.author.id) {
+        Ok(_) => try_send_message_context!(
+            ctx,
+            msg,
+            data.get_mut::<EditableMessages>().unwrap(),
+            "Yay! You received 200 shinies!"
+        ),
+        Err(err) => try_send_message_context!(
+            ctx,
+            msg,
+            data.get_mut::<EditableMessages>().unwrap(),
+            "{}",
+            err
+        ),
+    };
 
     Ok(())
 }
 
 #[command]
 pub fn credits(ctx: &mut Context, msg: &Message) -> CommandResult {
-    let data = ctx.data.read();
+    let mut data = ctx.data.write();
     let settings = data.get::<Settings>().unwrap();
     let amount = settings.users.retrieve_user_money_count(msg.author.id);
-    if let Err(why) = msg.channel_id.say(
-        &ctx.http,
-        format!(
-            "You have a total of {}<:ShinyYellow:324157128270938113>",
-            amount
-        ),
-    ) {
-        println!("Error sending message: {:?}", why);
-    }
-
+    try_send_message_context!(
+        ctx,
+        msg,
+        data.get_mut::<EditableMessages>().unwrap(),
+        "You have a total of {}<:ShinyYellow:324157128270938113>",
+        amount
+    );
     Ok(())
 }
 
@@ -54,7 +60,7 @@ pub fn credits(ctx: &mut Context, msg: &Message) -> CommandResult {
 #[usage = "[user]"]
 #[bucket = "social.profile"]
 pub fn profile(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {
-    let data = ctx.data.read();
+    let mut data = ctx.data.write();
     let settings = data.get::<Settings>().unwrap();
     let point_count: u32;
     let level: u32;
@@ -82,19 +88,13 @@ pub fn profile(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {
         progress = 0_f32;
     }
 
-    if let Err(why) = msg.channel_id.say(
-        &ctx.http,
-        format!(
-            "[ {user_name} ] **Level**: {level} | `{level_previous}..{point_count}..{level_next}` `[{progress}]`",
-            level = level,
-            level_previous = level_previous,
-            level_next = level_next,
-            progress = percentage(35, progress),
-            point_count = point_count,
-            user_name = user_name
-        )
-    ) {
-        println!("Error sending message: {:?}", why);
-    }
+    try_send_message_context!(ctx, msg, data.get_mut::<EditableMessages>().unwrap(), "[ {user_name} ] **Level**: {level} | `{level_previous}..{point_count}..{level_next}` `[{progress}]`",
+        level = level,
+        level_previous = level_previous,
+        level_next = level_next,
+        progress = percentage(35, progress),
+        point_count = point_count,
+        user_name = user_name
+    );
     Ok(())
 }
