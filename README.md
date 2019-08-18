@@ -17,7 +17,7 @@ redistribution of this code without permission is strictly forbidden.
 
 ## Set-Up
 
-Copy and paste the [.env.example] file and rename it to `.env`, then fill it with the precise variables. Once all
+Copy and paste the [`.env.example`] file and rename it to `.env`, then fill it with the precise variables. Once all
 development requirements are set up:
 
 ```bash
