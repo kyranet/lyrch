@@ -7,23 +7,12 @@ use serenity::prelude::*;
 use std::collections::{HashMap, HashSet};
 use std::env;
 use std::sync::Arc;
+use threadpool::ThreadPool;
 
 pub fn initialize_client() -> Client {
     // Configure the client with your Discord bot token in the environment.
     let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
-    let client =
-        Client::new(&token, lib::util::event_handlers::Handler).expect("Err creating client");
-
-    {
-        let settings = lib::settings::Settings::new();
-        settings.init();
-        let mut data = client.data.write();
-        data.insert::<lib::core::CommandCounter>(HashMap::default());
-        data.insert::<lib::core::ShardManagerContainer>(Arc::clone(&client.shard_manager));
-        data.insert::<lib::settings::Settings>(settings);
-    }
-
-    client
+    Client::new(&token, lib::util::event_handlers::Handler).expect("Err creating client")
 }
 
 pub fn fetch_application_data(client: &Client) -> (HashSet<UserId>, UserId) {
@@ -155,6 +144,18 @@ pub fn configure(
         .owners(owners)
 }
 
+pub fn attach_data(client: &Client) {
+    let settings = lib::settings::Settings::new();
+    settings.init();
+    let mut data = client.data.write();
+    data.insert::<lib::settings::Settings>(settings);
+    data.insert::<lib::core::CommandCounter>(HashMap::default());
+    data.insert::<lib::core::ShardManagerContainer>(Arc::clone(&client.shard_manager));
+    data.insert::<lib::core::EditableMessages>(HashMap::default());
+    data.insert::<lib::core::ThreadPoolContainer>(Arc::new(Mutex::new(client.threadpool.clone())));
+    // data.insert::<lib::core::FrameworkContainer>(Arc::clone(&client.shard_manager.lock().shard_queuer.framework));
+}
+
 // A container type is created for inserting into the Client's `data`, which
 // allows for data to be accessible across all events and framework commands, or
 // anywhere else that has a copy of the `data` Arc.
@@ -169,3 +170,21 @@ pub struct CommandCounter;
 impl TypeMapKey for CommandCounter {
     type Value = HashMap<String, u64>;
 }
+
+pub struct EditableMessages;
+
+impl TypeMapKey for EditableMessages {
+    type Value = HashMap<MessageId, MessageId>;
+}
+
+pub struct ThreadPoolContainer;
+
+impl TypeMapKey for ThreadPoolContainer {
+    type Value = Arc<Mutex<ThreadPool>>;
+}
+
+// pub struct FrameworkContainer;
+
+// impl TypeMapKey for FrameworkContainer {
+//     type Value = Arc<Mutex<Option<Box<StandardFramework>>>>;
+// }

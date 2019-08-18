@@ -1,3 +1,4 @@
+use crate::send_message;
 use serenity::{
     framework::standard::{
         help_commands,
@@ -17,17 +18,12 @@ group!({
 });
 
 #[command]
-// Limit command usage to guilds.
 #[only_in(guilds)]
 pub fn ping(ctx: &mut Context, msg: &Message) -> CommandResult {
-    let response = msg.channel_id.say(&ctx, "Ping...");
+    let response = send_message!(ctx, msg, "Ping...");
     if let Ok(reply) = response {
         let latency = (reply.timestamp - msg.timestamp).num_milliseconds();
-        msg.channel_id
-            .edit_message(&ctx, reply, |e| {
-                e.content(format!("Pong! Took: {}ms!", latency))
-            })
-            .ok();
+        send_message!(ctx, msg, "Pong! Took: {}ms!", latency).ok();
     }
 
     Ok(())

@@ -10,6 +10,10 @@ impl EventHandler for Handler {
         println!("{} is connected!", ready.user.name);
     }
 
+    // fn message_update(ctx: Context, _: Option<Message>, message: Option<Message>, event: MessageUpdateEvent) {
+
+    // }
+
     fn guild_create(&self, ctx: Context, guild: Guild, _is_new: bool) {
         let mut data = ctx.data.write();
         let settings = data.get_mut::<Settings>().unwrap();
