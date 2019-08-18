@@ -149,6 +149,9 @@ pub fn attach_data(client: &Client) {
     settings.init();
     let mut data = client.data.write();
     data.insert::<lib::settings::Settings>(settings);
+    data.insert::<lib::cache::RedisConnection>(Arc::new(Mutex::new(
+        lib::cache::RedisConnection::new(),
+    )));
     data.insert::<lib::core::CommandCounter>(HashMap::default());
     data.insert::<lib::core::ShardManagerContainer>(Arc::clone(&client.shard_manager));
     data.insert::<lib::core::EditableMessages>(HashMap::default());

@@ -2,6 +2,7 @@ extern crate bit_vec;
 extern crate chrono;
 extern crate dotenv;
 extern crate postgres;
+extern crate redis;
 extern crate regex;
 extern crate serde_json;
 extern crate serenity;

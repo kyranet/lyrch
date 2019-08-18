@@ -2,6 +2,7 @@ use crate::lib::core::EditableMessages;
 use crate::lib::settings::Settings;
 use crate::lib::util::{percentage, resolvers::resolve_user};
 use crate::try_send_message_context;
+use serenity::prelude::*;
 use serenity::{
     framework::standard::{
         macros::{command, group},
@@ -9,7 +10,6 @@ use serenity::{
     },
     model::channel::Message,
 };
-use serenity::prelude::*;
 
 const SHINY: &'static str = "<:shiny:612364146792726539>";
 
@@ -31,12 +31,9 @@ pub fn daily(ctx: &mut Context, msg: &Message) -> CommandResult {
             "Yay! You received 200 {}!",
             SHINY
         ),
-        Err(err) => try_send_message_context!(
-            ctx,
-            msg,
-            data.get_mut::<EditableMessages>().unwrap(),
-            err
-        ),
+        Err(err) => {
+            try_send_message_context!(ctx, msg, data.get_mut::<EditableMessages>().unwrap(), err)
+        }
     };
 
     Ok(())
