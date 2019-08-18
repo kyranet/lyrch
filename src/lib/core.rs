@@ -149,12 +149,9 @@ pub fn attach_data(client: &Client) {
     settings.init();
     let mut data = client.data.write();
     data.insert::<lib::settings::Settings>(settings);
-    data.insert::<lib::cache::RedisConnection>(Arc::new(Mutex::new(
-        lib::cache::RedisConnection::new(),
-    )));
+    data.insert::<lib::cache::RedisConnection>(lib::cache::RedisConnection::new());
     data.insert::<lib::core::CommandCounter>(HashMap::default());
     data.insert::<lib::core::ShardManagerContainer>(Arc::clone(&client.shard_manager));
-    data.insert::<lib::core::EditableMessages>(HashMap::default());
     data.insert::<lib::core::ThreadPoolContainer>(Arc::new(Mutex::new(client.threadpool.clone())));
     // data.insert::<lib::core::FrameworkContainer>(Arc::clone(&client.shard_manager.lock().shard_queuer.framework));
 }
@@ -172,12 +169,6 @@ pub struct CommandCounter;
 
 impl TypeMapKey for CommandCounter {
     type Value = HashMap<String, u64>;
-}
-
-pub struct EditableMessages;
-
-impl TypeMapKey for EditableMessages {
-    type Value = HashMap<MessageId, MessageId>;
 }
 
 pub struct ThreadPoolContainer;

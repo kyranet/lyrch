@@ -1,4 +1,4 @@
-use crate::lib::core::EditableMessages;
+use crate::lib::cache::RedisConnection;
 use crate::lib::settings::Settings;
 use crate::lib::util::{percentage, resolvers::resolve_user};
 use crate::try_send_message_context;
@@ -27,12 +27,12 @@ pub fn daily(ctx: &mut Context, msg: &Message) -> CommandResult {
         Ok(_) => try_send_message_context!(
             ctx,
             msg,
-            data.get_mut::<EditableMessages>().unwrap(),
+            data.get_mut::<RedisConnection>().unwrap(),
             "Yay! You received 200 {}!",
             SHINY
         ),
         Err(err) => {
-            try_send_message_context!(ctx, msg, data.get_mut::<EditableMessages>().unwrap(), err)
+            try_send_message_context!(ctx, msg, data.get_mut::<RedisConnection>().unwrap(), err)
         }
     };
 
@@ -47,7 +47,7 @@ pub fn credits(ctx: &mut Context, msg: &Message) -> CommandResult {
     try_send_message_context!(
         ctx,
         msg,
-        data.get_mut::<EditableMessages>().unwrap(),
+        data.get_mut::<RedisConnection>().unwrap(),
         "You have a total of {} {}",
         amount,
         SHINY
@@ -87,7 +87,7 @@ pub fn profile(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {
         progress = 0_f32;
     }
 
-    try_send_message_context!(ctx, msg, data.get_mut::<EditableMessages>().unwrap(), "[ {user_name} ] **Level**: {level} | `{level_previous}..{point_count}..{level_next}` `[{progress}]`",
+    try_send_message_context!(ctx, msg, data.get_mut::<RedisConnection>().unwrap(), "[ {user_name} ] **Level**: {level} | `{level_previous}..{point_count}..{level_next}` `[{progress}]`",
         level = level,
         level_previous = level_previous,
         level_next = level_next,
