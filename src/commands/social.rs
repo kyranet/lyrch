@@ -11,7 +11,6 @@ use serenity::{
     model::channel::Message,
 };
 
-
 const SHINY: &str = "<:shiny:612364146792726539>";
 
 group!({

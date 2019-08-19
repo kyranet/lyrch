@@ -112,9 +112,9 @@ pub fn create_framework(owners: HashSet<UserId>, bot_id: UserId) -> StandardFram
         .group(&commands::general::GENERAL_GROUP)
         .group(&commands::social::SOCIAL_GROUP)
         .group(&commands::moderation::MODERATION_GROUP)
-         // .group(&EMOJI_GROUP)
-                                                // .group(&MATH_GROUP)
-                                                // .group(&OWNER_GROUP)
+    // .group(&EMOJI_GROUP)
+    // .group(&MATH_GROUP)
+    // .group(&OWNER_GROUP)
 }
 
 pub fn configure(

@@ -1,21 +1,16 @@
+use crate::try_send_message;
+use serenity::model::prelude::*;
+use serenity::prelude::*;
 use serenity::{
     framework::standard::{
         macros::{command, group},
         CommandResult,
     },
     model::{
+        channel::{Message, PermissionOverwrite, PermissionOverwriteType},
         Permissions,
-        channel::{
-            Message,
-            PermissionOverwrite,
-            PermissionOverwriteType,
-        },
     },
 };
-use serenity::model::prelude::*;
-use serenity::prelude::*;
-use crate::try_send_message;
-
 
 const LOCKDOWN_PERMISSION: Permissions = Permissions::SEND_MESSAGES;
 
@@ -46,20 +41,31 @@ pub fn lockdown(ctx: &mut Context, msg: &Message) -> CommandResult {
     };
 
     let channel_name = msg.channel_id.name(&ctx.cache).unwrap();
-    let patience = if channel_is_locked { format!("Locking the channel {}...", channel_name) } else { format!("Unlocking the channel {}...", channel_name) };
+    let patience = if channel_is_locked {
+        format!("Locking the channel {}...", channel_name)
+    } else {
+        format!("Unlocking the channel {}...", channel_name)
+    };
 
     try_send_message!(ctx, msg, patience);
 
     // assuming the cache has been unlocked
-    let channel = &ctx.cache
+    let channel = &ctx
+        .cache
         .read()
         .guild_channel(msg.channel_id.0)
         .ok_or(ModelError::ItemMissing)?;
 
     channel.read().create_permission(&ctx.http, &overwrite)?;
 
-    let response = if channel_is_locked { format!("The lockdown for the channel {} has been released.", channel_name) } else { format!("The channel {} is now locked.", channel_name) };
+    let response = if channel_is_locked {
+        format!(
+            "The lockdown for the channel {} has been released.",
+            channel_name
+        )
+    } else {
+        format!("The channel {} is now locked.", channel_name)
+    };
     try_send_message!(ctx, msg, response);
     Ok(())
-
 }
