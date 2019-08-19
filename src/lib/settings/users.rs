@@ -90,7 +90,7 @@ impl UserSettingsHandler {
         &self,
         id: UserId,
         key: &str,
-        value: &ToSql,
+        value: &dyn ToSql,
     ) -> Result<(), postgres::Error> {
         let connection = self.0.lock().unwrap();
         connection.execute(
