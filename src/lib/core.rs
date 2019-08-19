@@ -110,7 +110,9 @@ pub fn create_framework(owners: HashSet<UserId>, bot_id: UserId) -> StandardFram
         // They're made in the pattern: `#name_GROUP` for the group instance and `#name_GROUP_OPTIONS`.
         // #name is turned all uppercase
         .group(&commands::general::GENERAL_GROUP)
-        .group(&commands::social::SOCIAL_GROUP) // .group(&EMOJI_GROUP)
+        .group(&commands::social::SOCIAL_GROUP)
+        .group(&commands::moderation::MODERATION_GROUP)
+         // .group(&EMOJI_GROUP)
                                                 // .group(&MATH_GROUP)
                                                 // .group(&OWNER_GROUP)
 }
