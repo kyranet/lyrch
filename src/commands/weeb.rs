@@ -1,3 +1,5 @@
+use reqwest::header::{AUTHORIZATION, USER_AGENT};
+use serde::Deserialize;
 use serenity::prelude::*;
 use serenity::{
     framework::standard::{
@@ -6,14 +8,12 @@ use serenity::{
     },
     model::channel::Message,
 };
-use reqwest::header::{USER_AGENT, AUTHORIZATION};
 use std::env;
-use serde::{Deserialize};
+use serenity::utils::Colour;
 
 const VERSION: &str = "5.1.0 Nerom";
 
-#[derive(Debug)]
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize)]
 struct WeebSh {
     status: u32,
     id: String,
@@ -49,15 +49,28 @@ pub fn wblush(ctx: &mut Context, msg: &Message) -> CommandResult {
         msg.channel(&ctx).unwrap().is_nsfw()
     );
 
-    let token: String = format!("Wolke {}", env::var("WEEB_SH").expect("Expected a token in the environment"));
+    let token: String = format!(
+        "Wolke {}",
+        env::var("WEEB_SH").expect("Expected a token in the environment")
+    );
     let user_agent = format!("Skyra/{}", VERSION);
-    let res: WeebSh = CLIENT.get(&url)
+    let res: WeebSh = CLIENT
+        .get(&url)
         .header(USER_AGENT, user_agent)
         .header(AUTHORIZATION, token)
         .send()?
         .json()?;
 
-    match msg.channel_id.say(&ctx.http, &res.url) {
+    match msg.channel_id.send_message(&ctx, |m| {
+        m.embed(|e| {
+            e.image(res.url);
+            e.color(Colour::from_rgb(110, 136, 216));
+            e.footer(|f| {
+                f.text("Powered by weeb.sh");
+                f
+            })
+        })
+    }) {
         Err(error) => println!("Something went wrong: {:?}", error),
         Ok(_message) => println!("Sent blush random image"),
     };
