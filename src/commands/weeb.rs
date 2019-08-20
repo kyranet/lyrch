@@ -44,11 +44,109 @@ lazy_static! {
     .to_owned();
 }
 
-group!({
-    name: "weeb",
-    options: {},
-    commands: [wblush]
-});
+macro_rules! create_weeb_command {
+    ($($command:ident;)*) => {
+        group!({
+            name: "weeb",
+            options: {
+                prefix: "weeb",
+            },
+            commands: [$(
+                $command,
+            )*]
+        });
+
+        $(
+            #[command]
+            #[only_in(guilds)]
+            pub fn $command(ctx: &mut Context, msg: &Message) -> CommandResult {
+                let url = format!(
+                    concat!("https://api-v2.weeb.sh/images/random?type=", stringify!($command), "&nsfw={}"),
+                    msg.channel(&ctx).unwrap().is_nsfw()
+                );
+
+                let res: WeebSh = CLIENT
+                    .get(&url)
+                    .header(USER_AGENT, HEADER_USER_AGENT.to_owned())
+                    .header(AUTHORIZATION, HEADER_TOKEN.to_owned())
+                    .send()?
+                    .json()?;
+
+                match msg.channel_id.send_message(&ctx, |m| {
+                    m.embed(|e| {
+                        e.image(res.url);
+                        e.color(Colour::from_rgb(110, 136, 216));
+                        e.footer(|f| {
+                            f.text("Powered by weeb.sh");
+                            f
+                        })
+                    })
+                }) {
+                    Err(error) => println!("Something went wrong: {:?}", error),
+                    Ok(_message) => println!("Sent blush random image"),
+                };
+                Ok(())
+            }
+        )*
+    };
+}
+
+create_weeb_command! {
+    animal_cat;
+    animal_dog;
+    awoo;
+    baka;
+    bang;
+    banghead;
+    bite;
+    blush;
+    clagwimoth;
+    cry;
+    cuddle;
+    dab;
+    dance;
+    delet_this;
+    deredere;
+    discord_memes;
+    greet;
+    handholding;
+    highfive;
+    hug;
+    initial_d;
+    insult;
+    jojo;
+    kemonomimi;
+    kiss;
+    lewd;
+    lick;
+    megumin;
+    nani;
+    neko;
+    nom;
+    owo;
+    pat;
+    poi;
+    poke;
+    pout;
+    punch;
+    rem;
+    shrug;
+    slap;
+    sleepy;
+    smile;
+    smug;
+    stare;
+    sumfuk;
+    teehee;
+    thinking;
+    thumbsup;
+    tickle;
+    trap;
+    triggered;
+    wag;
+    waifu_insult;
+    wasted;
+}
 
 #[command]
 #[only_in(guilds)]
