@@ -1,5 +1,5 @@
 use crate::lib::cache::RedisConnection;
-use crate::lib::settings::Settings;
+use crate::lib::settings::users::UserSettingsHandler;
 use crate::lib::settings::SettingsHandler;
 use crate::lib::util::{percentage, resolvers::resolve_user};
 use crate::try_send_message_context;
@@ -23,8 +23,8 @@ group!({
 #[command]
 pub fn daily(ctx: &mut Context, msg: &Message) -> CommandResult {
     let data = ctx.data.read();
-    let settings = data.get::<Settings>().unwrap();
-    match settings.users.try_daily(msg.author.id) {
+    let settings = data.get::<UserSettingsHandler>().unwrap();
+    match settings.try_daily(msg.author.id) {
         Ok(_) => try_send_message_context!(
             ctx,
             msg,
@@ -43,8 +43,8 @@ pub fn daily(ctx: &mut Context, msg: &Message) -> CommandResult {
 #[command]
 pub fn credits(ctx: &mut Context, msg: &Message) -> CommandResult {
     let data = ctx.data.read();
-    let settings = data.get::<Settings>().unwrap();
-    let amount = settings.users.retrieve_user_money_count(msg.author.id);
+    let settings = data.get::<UserSettingsHandler>().unwrap();
+    let amount = settings.retrieve_user_money_count(msg.author.id);
     try_send_message_context!(
         ctx,
         msg,
@@ -61,7 +61,7 @@ pub fn credits(ctx: &mut Context, msg: &Message) -> CommandResult {
 #[bucket = "social.profile"]
 pub fn profile(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {
     let data = ctx.data.read();
-    let settings = data.get::<Settings>().unwrap();
+    let settings = data.get::<UserSettingsHandler>().unwrap();
 
     let (user_name, user_id) = if let Some(user) = resolve_user(&ctx, &args) {
         let user = user.read();
@@ -70,7 +70,7 @@ pub fn profile(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {
         (msg.author.name.clone(), msg.author.id)
     };
 
-    let profile = settings.users.fetch(user_id);
+    let profile = settings.fetch(user_id);
     let point_count = profile.point_count;
     let level = profile.get_level();
     let level_previous = (level as f32 / 0.2).powf(2.0).floor() as i32;

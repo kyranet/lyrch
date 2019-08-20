@@ -1,15 +1,19 @@
 use super::SettingsHandler;
-use postgres::Connection;
+use r2d2::Pool;
+use r2d2_postgres::PostgresConnectionManager;
 use serenity::model::prelude::*;
 use serenity::prelude::*;
-use std::sync::Arc;
 
-pub struct ClientSettingsHandler(Arc<Mutex<Connection>>);
+pub struct ClientSettingsHandler(pub Pool<PostgresConnectionManager>);
 
 impl ClientSettingsHandler {
-    pub fn new(connection: Arc<Mutex<Connection>>) -> ClientSettingsHandler {
-        ClientSettingsHandler(connection)
+    pub fn new(pool: Pool<PostgresConnectionManager>) -> Self {
+        Self(pool)
     }
+}
+
+impl TypeMapKey for ClientSettingsHandler {
+    type Value = ClientSettingsHandler;
 }
 
 impl SettingsHandler for ClientSettingsHandler {
@@ -26,7 +30,7 @@ impl SettingsHandler for ClientSettingsHandler {
     );
 
     fn fetch(&self, id: impl AsRef<Self::Id>) -> Self::Output {
-        let connection = self.0.lock();
+        let connection = self.0.clone().get().unwrap();
         let id = id.as_ref();
         if let Ok(result) = connection.query("SELECT * FROM users WHERE id = $1", &[&(id.0 as i64)])
         {

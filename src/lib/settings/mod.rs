@@ -3,39 +3,23 @@ pub mod guilds;
 pub mod users;
 
 use postgres::types::ToSql;
-use postgres::{Connection, TlsMode};
+use r2d2::Pool;
+use r2d2_postgres::{PostgresConnectionManager, TlsMode};
 use serenity::prelude::*;
 use std::env;
-use std::sync::Arc;
 
-pub struct Settings {
-    pub connection: Arc<Mutex<Connection>>,
-    pub guilds: guilds::GuildSettingsHandler,
-    pub users: users::UserSettingsHandler,
-    pub clients: clients::ClientSettingsHandler,
-}
+pub struct Settings(pub Pool<PostgresConnectionManager>);
 
 impl TypeMapKey for Settings {
     type Value = Settings;
 }
 
 impl Settings {
-    pub fn new() -> Settings {
+    pub fn new() -> Self {
         let url = env::var("POSTGRES_URL").expect("Expected POSTGRES_URL to be set.");
-        let connection = Connection::connect(url, TlsMode::None).unwrap();
-        let connection = Arc::new(Mutex::new(connection));
-        Settings {
-            connection: connection.clone(),
-            guilds: guilds::GuildSettingsHandler::new(connection.clone()),
-            users: users::UserSettingsHandler::new(connection.clone()),
-            clients: clients::ClientSettingsHandler::new(connection.clone()),
-        }
-    }
-
-    pub fn init(&self) {
-        self.guilds.init();
-        self.users.init();
-        self.clients.init();
+        let manager = PostgresConnectionManager::new(url, TlsMode::None).unwrap();
+        let pool = Pool::new(manager).unwrap();
+        Self(pool)
     }
 }
 
@@ -63,7 +47,7 @@ pub trait SettingsHandler {
 macro_rules! apply_settings_init {
     ($table:expr, $schema:expr) => {
         fn init(&self) {
-            let connection = self.0.lock();
+            let connection = self.0.clone().get().unwrap();
             connection
                 .execute(
                     concat!("CREATE TABLE IF NOT EXISTS ", $table, " (\n", $schema, "\n)"),
@@ -74,7 +58,7 @@ macro_rules! apply_settings_init {
     };
     ($table:expr, $schema:expr, $($index_name:tt => $index_content:tt)*) => {
         fn init(&self) {
-            let connection = self.0.lock();
+            let connection = self.0.clone().get().unwrap();
             connection
                 .execute(
                     concat!("CREATE TABLE IF NOT EXISTS ", $table, " (\n", $schema, "\n)"),
@@ -105,7 +89,7 @@ macro_rules! apply_settings_init {
 macro_rules! apply_settings_update {
     ($table:expr) => {
         fn update(&self, id: impl AsRef<Self::Id>, key: &str, value: &dyn postgres::types::ToSql) -> Result<(), postgres::Error> {
-            let connection = self.0.lock();
+            let connection = self.0.clone().get().unwrap();
             connection.execute(
                 format!(concat!("INSERT INTO ", $table, " (id, {key})
                         VALUES ($1, $2)
@@ -122,7 +106,7 @@ macro_rules! apply_settings_update {
 macro_rules! apply_settings_update_increase {
     ($table:expr) => {
         fn update_increase(&self, id: impl AsRef<Self::Id>, key: &str, value: &dyn postgres::types::ToSql) -> Result<(), postgres::Error> {
-            let connection = self.0.lock();
+            let connection = self.0.clone().get().unwrap();
             connection.execute(
                 format!(concat!("INSERT INTO ", $table, " (id, {key})
                         VALUES ($1, $2)

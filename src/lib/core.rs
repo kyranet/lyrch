@@ -132,8 +132,10 @@ pub fn configure(
         .dynamic_prefix(|ctx, msg| {
             if let Some(guild_id) = msg.guild_id {
                 let data = ctx.data.write();
-                let stg = data.get::<lib::settings::Settings>().unwrap();
-                if let Some(guild) = stg.guilds.get(guild_id) {
+                let guilds = data
+                    .get::<lib::settings::guilds::GuildSettingsHandler>()
+                    .unwrap();
+                if let Some(guild) = guilds.get(guild_id) {
                     return guild.prefix.clone();
                 }
             }
@@ -145,15 +147,25 @@ pub fn configure(
 }
 
 pub fn attach_data(client: &Client, framework: lib::framework::LyrchFramework) {
-    let settings = lib::settings::Settings::new();
-    settings.init();
+    use lib::{
+        cache, core, framework,
+        settings::{
+            clients::ClientSettingsHandler, guilds::GuildSettingsHandler,
+            users::UserSettingsHandler, Settings,
+        },
+    };
+
+    let settings = Settings::new();
     let mut data = client.data.write();
-    data.insert::<lib::settings::Settings>(settings);
-    data.insert::<lib::cache::RedisConnection>(lib::cache::RedisConnection::new());
-    data.insert::<lib::core::CommandCounter>(HashMap::default());
-    data.insert::<lib::core::ShardManagerContainer>(Arc::clone(&client.shard_manager));
-    data.insert::<lib::core::ThreadPoolContainer>(Arc::new(Mutex::new(client.threadpool.clone())));
-    data.insert::<lib::framework::LyrchFramework>(framework);
+    data.insert::<ClientSettingsHandler>(ClientSettingsHandler::new(settings.0.clone()));
+    data.insert::<GuildSettingsHandler>(GuildSettingsHandler::new(settings.0.clone()));
+    data.insert::<UserSettingsHandler>(UserSettingsHandler::new(settings.0.clone()));
+    data.insert::<Settings>(settings);
+    data.insert::<cache::RedisConnection>(lib::cache::RedisConnection::new());
+    data.insert::<core::CommandCounter>(HashMap::default());
+    data.insert::<core::ShardManagerContainer>(Arc::clone(&client.shard_manager));
+    data.insert::<core::ThreadPoolContainer>(Arc::new(Mutex::new(client.threadpool.clone())));
+    data.insert::<framework::LyrchFramework>(framework);
 }
 
 pub struct ShardManagerContainer;

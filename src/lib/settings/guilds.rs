@@ -1,17 +1,24 @@
 use super::SettingsHandler;
 use bit_vec::BitVec;
-use postgres::Connection;
+use r2d2::Pool;
+use r2d2_postgres::PostgresConnectionManager;
 use serde_json::from_value;
 use serenity::model::prelude::*;
-use std::collections::HashMap;
 use serenity::prelude::*;
-use std::sync::Arc;
+use std::collections::HashMap;
 
-pub struct GuildSettingsHandler(Arc<Mutex<Connection>>, HashMap<GuildId, GuildSettings>);
+pub struct GuildSettingsHandler(
+    Pool<PostgresConnectionManager>,
+    HashMap<GuildId, GuildSettings>,
+);
+
+impl TypeMapKey for GuildSettingsHandler {
+    type Value = GuildSettingsHandler;
+}
 
 impl GuildSettingsHandler {
-    pub fn new(connection: Arc<Mutex<Connection>>) -> GuildSettingsHandler {
-        GuildSettingsHandler(connection, HashMap::new())
+    pub fn new(connection: Pool<PostgresConnectionManager>) -> Self {
+        Self(connection, HashMap::new())
     }
 
     pub fn get(&self, id: GuildId) -> Option<&GuildSettings> {
@@ -103,7 +110,7 @@ impl SettingsHandler for GuildSettingsHandler {
     );
 
     fn fetch(&self, id: impl AsRef<Self::Id>) -> Self::Output {
-        let connection = self.0.lock();
+        let connection = self.0.clone().get().unwrap();
         let id = id.as_ref();
         if let Ok(result) =
             connection.query("SELECT * FROM guilds WHERE id = $1", &[&(id.0 as i64)])
