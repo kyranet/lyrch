@@ -146,7 +146,7 @@ pub fn configure(
         .owners(owners)
 }
 
-pub fn attach_data(client: &Client) {
+pub fn attach_data(client: &Client, framework: lib::framework::LyrchFramework) {
     let settings = lib::settings::Settings::new();
     settings.init();
     let mut data = client.data.write();
@@ -155,12 +155,9 @@ pub fn attach_data(client: &Client) {
     data.insert::<lib::core::CommandCounter>(HashMap::default());
     data.insert::<lib::core::ShardManagerContainer>(Arc::clone(&client.shard_manager));
     data.insert::<lib::core::ThreadPoolContainer>(Arc::new(Mutex::new(client.threadpool.clone())));
-    // data.insert::<lib::core::FrameworkContainer>(Arc::clone(&client.shard_manager.lock().shard_queuer.framework));
+    data.insert::<lib::framework::LyrchFramework>(framework);
 }
 
-// A container type is created for inserting into the Client's `data`, which
-// allows for data to be accessible across all events and framework commands, or
-// anywhere else that has a copy of the `data` Arc.
 pub struct ShardManagerContainer;
 
 impl TypeMapKey for ShardManagerContainer {
@@ -178,9 +175,3 @@ pub struct ThreadPoolContainer;
 impl TypeMapKey for ThreadPoolContainer {
     type Value = Arc<Mutex<ThreadPool>>;
 }
-
-// pub struct FrameworkContainer;
-
-// impl TypeMapKey for FrameworkContainer {
-//     type Value = Arc<Mutex<Option<Box<StandardFramework>>>>;
-// }

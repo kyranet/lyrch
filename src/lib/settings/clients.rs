@@ -1,3 +1,4 @@
+use super::SettingsHandler;
 use postgres::Connection;
 use serenity::model::prelude::*;
 use std::sync::{Arc, Mutex};
@@ -8,34 +9,32 @@ impl ClientSettingsHandler {
     pub fn new(connection: Arc<Mutex<Connection>>) -> ClientSettingsHandler {
         ClientSettingsHandler(connection)
     }
+}
 
-    pub fn init(&self) {
-        let connection = self.0.lock().unwrap();
-        connection
-            .execute(
-                "CREATE TABLE IF NOT EXISTS clients (
-                    id            BIGINT PRIMARY KEY,
-                    boosts_guild  BIGINT[]  DEFAULT '{}'::BIGINT[]  NOT NULL,
-                    boosts_users  BIGINT[]  DEFAULT '{}'::BIGINT[]  NOT NULL
-                )",
-                &[],
-            )
-            .unwrap();
-    }
+impl SettingsHandler for ClientSettingsHandler {
+    type Id = UserId;
+    type Output = ClientSettings;
 
-    // TODO(kyranet): Use this
-    #[allow(dead_code)]
-    pub fn fetch(&self, id: UserId) -> Option<ClientSettings> {
+    crate::apply_settings_init!(
+        "clients",
+        "
+            id            BIGINT PRIMARY KEY,
+            boosts_guild  BIGINT[]  DEFAULT '{}'::BIGINT[]  NOT NULL,
+            boosts_users  BIGINT[]  DEFAULT '{}'::BIGINT[]  NOT NULL
+        "
+    );
+
+    fn fetch(&self, id: impl AsRef<Self::Id>) -> Option<Self::Output> {
         let connection = self.0.lock().unwrap();
-        if let Ok(result) =
-            connection.query("SELECT * FROM clients WHERE id = $1", &[&(id.0 as i64)])
+        let id = id.as_ref();
+        if let Ok(result) = connection.query("SELECT * FROM users WHERE id = $1", &[&(id.0 as i64)])
         {
             if result.is_empty() {
                 None
             } else {
                 let row = result.get(0);
-                Some(ClientSettings {
-                    id,
+                Some(Self::Output {
+                    id: *id,
                     boosts_guild: row.get(1),
                     boosts_users: row.get(2),
                 })
@@ -44,6 +43,9 @@ impl ClientSettingsHandler {
             None
         }
     }
+
+    crate::apply_settings_update!("clients");
+    crate::apply_settings_update_increase!("clients");
 }
 
 #[derive(Debug)]

@@ -1,5 +1,5 @@
+use super::SettingsHandler;
 use chrono::prelude::*;
-use postgres::types::ToSql;
 use postgres::Connection;
 use serenity::model::prelude::*;
 use std::error::Error;
@@ -10,102 +10,6 @@ pub struct UserSettingsHandler(Arc<Mutex<Connection>>);
 impl UserSettingsHandler {
     pub fn new(connection: Arc<Mutex<Connection>>) -> UserSettingsHandler {
         UserSettingsHandler(connection)
-    }
-
-    pub fn init(&self) {
-        let connection = self.0.lock().unwrap();
-        connection
-            .execute(
-                "CREATE TABLE IF NOT EXISTS users (
-                    id                BIGINT PRIMARY KEY,
-                    banner_set        VARCHAR(6),
-                    banner_list       VARCHAR(6)[]  DEFAULT '{}'::VARCHAR(6)[]  NOT NULL,
-                    badge_set         VARCHAR(6)[]  DEFAULT '{}'::VARCHAR(6)[]  NOT NULL,
-                    badge_list        VARCHAR(6)[]  DEFAULT '{}'::VARCHAR(6)[]  NOT NULL,
-                    color             INTEGER       DEFAULT 0                   NOT NULL,
-                    money_count       INTEGER       DEFAULT 0                   NOT NULL,
-                    point_count       INTEGER       DEFAULT 0                   NOT NULL,
-                    reputation_count  INTEGER       DEFAULT 0                   NOT NULL,
-                    next_daily        TIMESTAMP,
-                    next_reputation   TIMESTAMP
-                )",
-                &[],
-            )
-            .unwrap();
-        connection
-            .execute(
-                "CREATE INDEX IF NOT EXISTS points ON ONLY users (
-                    point_count       DESC
-                )",
-                &[],
-            )
-            .unwrap();
-    }
-
-    pub fn fetch(&self, id: UserId) -> Option<UserSettings> {
-        let connection = self.0.lock().unwrap();
-        if let Ok(result) = connection.query("SELECT * FROM users WHERE id = $1", &[&(id.0 as i64)])
-        {
-            if result.is_empty() {
-                None
-            } else {
-                let row = result.get(0);
-                let color: i32 = row.get(5);
-                let money_count: i32 = row.get(6);
-                let point_count: i32 = row.get(7);
-                let reputation_count: i32 = row.get(8);
-                Some(UserSettings {
-                    id,
-                    banner_set: row.get(1),
-                    banner_list: row.get(2),
-                    badge_set: row.get(3),
-                    badge_list: row.get(4),
-                    color: color as u32,
-                    money_count: money_count as u32,
-                    point_count: point_count as u32,
-                    reputation_count: reputation_count as u32,
-                    next_daily: row.get(9),
-                    next_reputation: row.get(10),
-                })
-            }
-        } else {
-            None
-        }
-    }
-
-    // pub fn update(&self, id: UserId, key: &str, value: &ToSql) -> Result<(), postgres::Error> {
-    //     let connection = self.0.lock().unwrap();
-    //     connection.execute(
-    //         format!("
-    //             INSERT INTO users (id, {key})
-    //                 VALUES ($1, $2)
-    //             ON CONFLICT (id)
-    //             DO UPDATE SET {key} = $2;", key = key).as_str(),
-    //             &[value]
-    //     )?;
-    //     Ok(())
-    // }
-
-    pub fn update_increase(
-        &self,
-        id: UserId,
-        key: &str,
-        value: &dyn ToSql,
-    ) -> Result<(), postgres::Error> {
-        let connection = self.0.lock().unwrap();
-        connection.execute(
-            format!(
-                "
-                INSERT INTO users (id, {key})
-                    VALUES ($1, $2)
-                ON CONFLICT (id)
-                DO UPDATE SET {key} = users.{key} + $2;",
-                key = key
-            )
-            .as_str(),
-            &[&(id.0 as i64), value],
-        )?;
-        Ok(())
     }
 
     pub fn retrieve_user_money_count(&self, id: UserId) -> u32 {
@@ -174,6 +78,66 @@ impl UserSettingsHandler {
             Ok(())
         }
     }
+}
+
+impl SettingsHandler for UserSettingsHandler {
+    type Id = UserId;
+    type Output = UserSettings;
+
+    crate::apply_settings_init!(
+        "users",
+        "
+            id                BIGINT PRIMARY KEY,
+            banner_set        VARCHAR(6),
+            banner_list       VARCHAR(6)[]  DEFAULT '{}'::VARCHAR(6)[]  NOT NULL,
+            badge_set         VARCHAR(6)[]  DEFAULT '{}'::VARCHAR(6)[]  NOT NULL,
+            badge_list        VARCHAR(6)[]  DEFAULT '{}'::VARCHAR(6)[]  NOT NULL,
+            color             INTEGER       DEFAULT 0                   NOT NULL,
+            money_count       INTEGER       DEFAULT 0                   NOT NULL,
+            point_count       INTEGER       DEFAULT 0                   NOT NULL,
+            reputation_count  INTEGER       DEFAULT 0                   NOT NULL,
+            next_daily        TIMESTAMP,
+            next_reputation   TIMESTAMP
+        ",
+        "points" => "
+            point_count       DESC
+        "
+    );
+
+    fn fetch(&self, id: impl AsRef<Self::Id>) -> Option<Self::Output> {
+        let connection = self.0.lock().unwrap();
+        let id = id.as_ref();
+        if let Ok(result) = connection.query("SELECT * FROM users WHERE id = $1", &[&(id.0 as i64)])
+        {
+            if result.is_empty() {
+                None
+            } else {
+                let row = result.get(0);
+                let color: i32 = row.get(5);
+                let money_count: i32 = row.get(6);
+                let point_count: i32 = row.get(7);
+                let reputation_count: i32 = row.get(8);
+                Some(Self::Output {
+                    id: *id,
+                    banner_set: row.get(1),
+                    banner_list: row.get(2),
+                    badge_set: row.get(3),
+                    badge_list: row.get(4),
+                    color: color as u32,
+                    money_count: money_count as u32,
+                    point_count: point_count as u32,
+                    reputation_count: reputation_count as u32,
+                    next_daily: row.get(9),
+                    next_reputation: row.get(10),
+                })
+            }
+        } else {
+            None
+        }
+    }
+
+    crate::apply_settings_update!("users");
+    crate::apply_settings_update_increase!("users");
 }
 
 #[derive(Debug)]
