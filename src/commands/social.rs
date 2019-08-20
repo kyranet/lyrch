@@ -1,5 +1,6 @@
 use crate::lib::cache::RedisConnection;
 use crate::lib::settings::Settings;
+use crate::lib::settings::SettingsHandler;
 use crate::lib::util::{percentage, resolvers::resolve_user};
 use crate::try_send_message_context;
 use serenity::prelude::*;
@@ -11,7 +12,7 @@ use serenity::{
     model::channel::Message,
 };
 
-const SHINY: &'static str = "<:shiny:612364146792726539>";
+const SHINY: &str = "<:shiny:612364146792726539>";
 
 group!({
     name: "social",

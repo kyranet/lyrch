@@ -1,3 +1,4 @@
+use super::SettingsHandler;
 use bit_vec::BitVec;
 use postgres::Connection;
 use serde_json::from_value;
@@ -12,84 +13,97 @@ impl GuildSettingsHandler {
         GuildSettingsHandler(connection, HashMap::new())
     }
 
-    pub fn init(&self) {
-        let connection = self.0.lock().unwrap();
-        connection
-            .execute(
-                "CREATE TABLE IF NOT EXISTS guilds (
-                    id                                      BIGINT          PRIMARY KEY,
-                    prefix                                  VARCHAR(10),
-                    tags                                    JSON            DEFAULT '{}'::JSON       NOT NULL,
-                    channels_announcement_id                BIGINT,
-                    channels_greeting_id                    BIGINT,
-                    channels_farewell_id                    BIGINT,
-                    channels_member_logs_id                 BIGINT,
-                    channels_message_logs_id                BIGINT,
-                    channels_nsfw_message_logs_id           BIGINT,
-                    channels_moderation_logs_id             BIGINT,
-                    channels_roles_id                       BIGINT,
-                    channels_spam_id                        BIGINT,
-                    command_autodelete                      JSON            DEFAULT '{}'::JSON       NOT NULL,
-                    disabled_channels                       BIGINT[]        DEFAULT '{}'::BIGINT[]   NOT NULL,
-                    disabled_command_channels               JSON            DEFAULT '{}'::JSON       NOT NULL,
-                    events_ban_add                          BOOLEAN         DEFAULT false            NOT NULL,
-                    events_ban_remove                       BOOLEAN         DEFAULT false            NOT NULL,
-                    events_member_add                       BOOLEAN         DEFAULT false            NOT NULL,
-                    events_member_remove                    BOOLEAN         DEFAULT false            NOT NULL,
-                    events_message_add                      BOOLEAN         DEFAULT false            NOT NULL,
-                    events_message_remove                   BOOLEAN         DEFAULT false            NOT NULL,
-                    filter_level_enabled                    BIT(3)          DEFAULT B'000'           NOT NULL,
-                    filter_raw                              VARCHAR(100)[]  DEFAULT '{}'::BIGINT[]   NOT NULL,
-                    messages_farewell                       VARCHAR(2000),
-                    messages_greeting                       VARCHAR(2000),
-                    messages_join_dm                        VARCHAR(2000),
-                    messages_warnings                       BOOLEAN         DEFAULT false            NOT NULL,
-                    messages_ignore_channels                BIGINT[]        DEFAULT '{}'::BIGINT[]   NOT NULL,
-                    sticky_roles                            JSON            DEFAULT '{}'::JSON       NOT NULL,
-                    roles_administrator_id                  BIGINT,
-                    roles_moderator_id                      BIGINT,
-                    roles_staff_id                          BIGINT,
-                    roles_automatic                         JSON            DEFAULT '{}'::JSON       NOT NULL,
-                    roles_initial                           BIGINT,
-                    roles_mute_id                           BIGINT,
-                    roles_public                            BIGINT[]        DEFAULT '{}'::BIGINT[]   NOT NULL,
-                    roles_reactions                         JSON            DEFAULT '{}'::JSON       NOT NULL,
-                    roles_remove_initial                    BOOLEAN         DEFAULT false            NOT NULL,
-                    roles_subscriber_id                     BIGINT,
-                    roles_unique_role_sets                  JSON            DEFAULT '{}'::JSON       NOT NULL,
-                    selfmod_attachment                      BOOLEAN         DEFAULT false            NOT NULL,
-                    selfmod_attachment_maximum              SMALLINT        DEFAULT 20               NOT NULL,
-                    selfmod_attachment_duration             INTEGER         DEFAULT 5000             NOT NULL,
-                    selfmod_attachment_action               SMALLINT        DEFAULT 0                NOT NULL,
-                    selfmod_attachment_punishment_duration  INTEGER,
-                    selfmod_caps_enabled                    BIT(3)          DEFAULT B'000'           NOT NULL,
-                    selfmod_caps_minimum                    SMALLINT        DEFAULT 10               NOT NULL,
-                    selfmod_caps_threshold                  SMALLINT        DEFAULT 50               NOT NULL,
-                    selfmod_invitelinks_enabled             BIT(3)          DEFAULT B'000'           NOT NULL,
-                    selfmod_raid_enabled                    BIT(3)          DEFAULT B'000'           NOT NULL,
-                    selfmod_raid_threshold                  SMALLINT        DEFAULT 10               NOT NULL,
-                    selfmod_ignore_channels                 BIGINT[]        DEFAULT '{}'::BIGINT[]   NOT NULL,
-                    nms_enabled                             BOOLEAN         DEFAULT false            NOT NULL,
-                    nms_alert_enabled                       BOOLEAN         DEFAULT false            NOT NULL,
-                    nms_allowed_mention_count               SMALLINT        DEFAULT 20               NOT NULL,
-                    nms_refresh_time                        SMALLINT        DEFAULT 8                NOT NULL,
-                    social_achievement_enabled              BOOLEAN         DEFAULT false            NOT NULL,
-                    social_achievement_message              VARCHAR(2000),
-                    social_ignore_channels                  BIGINT[]        DEFAULT '{}'::BIGINT[]   NOT NULL,
-                    starboard_channel                       BIGINT,
-                    starboard_emoji                         VARCHAR(4),
-                    starboard_minimum_count                 SMALLINT        DEFAULT 1                NOT NULL,
-                    starboard_ignore_channels               BIGINT[]        DEFAULT '{}'::BIGINT[]   NOT NULL,
-                    trigger_alias                           JSON            DEFAULT '{}'::JSON       NOT NULL,
-                    trigger_includes                        JSON            DEFAULT '{}'::JSON       NOT NULL
-                )",
-                &[],
-            )
-            .unwrap();
+    pub fn get(&self, id: GuildId) -> Option<&GuildSettings> {
+        self.1.get(&id)
     }
 
-    pub fn fetch(&self, id: GuildId) -> Option<GuildSettings> {
+    pub fn add(&mut self, settings: GuildSettings) -> Option<GuildSettings> {
+        self.1.insert(settings.id, settings)
+    }
+
+    pub fn remove(&mut self, id: GuildId) -> Option<GuildSettings> {
+        self.1.remove(&id)
+    }
+}
+
+impl SettingsHandler for GuildSettingsHandler {
+    type Id = GuildId;
+    type Output = GuildSettings;
+
+    crate::apply_settings_init!(
+        "guilds",
+        "
+            id                                      BIGINT          PRIMARY KEY,
+            prefix                                  VARCHAR(10),
+            tags                                    JSON            DEFAULT '{}'::JSON       NOT NULL,
+            channels_announcement_id                BIGINT,
+            channels_greeting_id                    BIGINT,
+            channels_farewell_id                    BIGINT,
+            channels_member_logs_id                 BIGINT,
+            channels_message_logs_id                BIGINT,
+            channels_nsfw_message_logs_id           BIGINT,
+            channels_moderation_logs_id             BIGINT,
+            channels_roles_id                       BIGINT,
+            channels_spam_id                        BIGINT,
+            command_autodelete                      JSON            DEFAULT '{}'::JSON       NOT NULL,
+            disabled_channels                       BIGINT[]        DEFAULT '{}'::BIGINT[]   NOT NULL,
+            disabled_command_channels               JSON            DEFAULT '{}'::JSON       NOT NULL,
+            events_ban_add                          BOOLEAN         DEFAULT false            NOT NULL,
+            events_ban_remove                       BOOLEAN         DEFAULT false            NOT NULL,
+            events_member_add                       BOOLEAN         DEFAULT false            NOT NULL,
+            events_member_remove                    BOOLEAN         DEFAULT false            NOT NULL,
+            events_message_add                      BOOLEAN         DEFAULT false            NOT NULL,
+            events_message_remove                   BOOLEAN         DEFAULT false            NOT NULL,
+            filter_level_enabled                    BIT(3)          DEFAULT B'000'           NOT NULL,
+            filter_raw                              VARCHAR(100)[]  DEFAULT '{}'::BIGINT[]   NOT NULL,
+            messages_farewell                       VARCHAR(2000),
+            messages_greeting                       VARCHAR(2000),
+            messages_join_dm                        VARCHAR(2000),
+            messages_warnings                       BOOLEAN         DEFAULT false            NOT NULL,
+            messages_ignore_channels                BIGINT[]        DEFAULT '{}'::BIGINT[]   NOT NULL,
+            sticky_roles                            JSON            DEFAULT '{}'::JSON       NOT NULL,
+            roles_administrator_id                  BIGINT,
+            roles_moderator_id                      BIGINT,
+            roles_staff_id                          BIGINT,
+            roles_automatic                         JSON            DEFAULT '{}'::JSON       NOT NULL,
+            roles_initial                           BIGINT,
+            roles_mute_id                           BIGINT,
+            roles_public                            BIGINT[]        DEFAULT '{}'::BIGINT[]   NOT NULL,
+            roles_reactions                         JSON            DEFAULT '{}'::JSON       NOT NULL,
+            roles_remove_initial                    BOOLEAN         DEFAULT false            NOT NULL,
+            roles_subscriber_id                     BIGINT,
+            roles_unique_role_sets                  JSON            DEFAULT '{}'::JSON       NOT NULL,
+            selfmod_attachment                      BOOLEAN         DEFAULT false            NOT NULL,
+            selfmod_attachment_maximum              SMALLINT        DEFAULT 20               NOT NULL,
+            selfmod_attachment_duration             INTEGER         DEFAULT 5000             NOT NULL,
+            selfmod_attachment_action               SMALLINT        DEFAULT 0                NOT NULL,
+            selfmod_attachment_punishment_duration  INTEGER,
+            selfmod_caps_enabled                    BIT(3)          DEFAULT B'000'           NOT NULL,
+            selfmod_caps_minimum                    SMALLINT        DEFAULT 10               NOT NULL,
+            selfmod_caps_threshold                  SMALLINT        DEFAULT 50               NOT NULL,
+            selfmod_invitelinks_enabled             BIT(3)          DEFAULT B'000'           NOT NULL,
+            selfmod_raid_enabled                    BIT(3)          DEFAULT B'000'           NOT NULL,
+            selfmod_raid_threshold                  SMALLINT        DEFAULT 10               NOT NULL,
+            selfmod_ignore_channels                 BIGINT[]        DEFAULT '{}'::BIGINT[]   NOT NULL,
+            nms_enabled                             BOOLEAN         DEFAULT false            NOT NULL,
+            nms_alert_enabled                       BOOLEAN         DEFAULT false            NOT NULL,
+            nms_allowed_mention_count               SMALLINT        DEFAULT 20               NOT NULL,
+            nms_refresh_time                        SMALLINT        DEFAULT 8                NOT NULL,
+            social_achievement_enabled              BOOLEAN         DEFAULT false            NOT NULL,
+            social_achievement_message              VARCHAR(2000),
+            social_ignore_channels                  BIGINT[]        DEFAULT '{}'::BIGINT[]   NOT NULL,
+            starboard_channel                       BIGINT,
+            starboard_emoji                         VARCHAR(4),
+            starboard_minimum_count                 SMALLINT        DEFAULT 1                NOT NULL,
+            starboard_ignore_channels               BIGINT[]        DEFAULT '{}'::BIGINT[]   NOT NULL,
+            trigger_alias                           JSON            DEFAULT '{}'::JSON       NOT NULL,
+            trigger_includes                        JSON            DEFAULT '{}'::JSON       NOT NULL
+        "
+    );
+
+    fn fetch(&self, id: impl AsRef<Self::Id>) -> Option<Self::Output> {
         let connection = self.0.lock().unwrap();
+        let id = id.as_ref();
         if let Ok(result) =
             connection.query("SELECT * FROM guilds WHERE id = $1", &[&(id.0 as i64)])
         {
@@ -97,8 +111,8 @@ impl GuildSettingsHandler {
                 None
             } else {
                 let row = result.get(0);
-                Some(GuildSettings {
-                    id,
+                Some(Self::Output {
+                    id: *id,
                     prefix: row.get(1),
                     tags: from_value(row.get(2)).unwrap(),
                     channels_announcement_id: row.get(3),
@@ -170,17 +184,8 @@ impl GuildSettingsHandler {
         }
     }
 
-    pub fn get(&self, id: GuildId) -> Option<&GuildSettings> {
-        self.1.get(&id)
-    }
-
-    pub fn add(&mut self, settings: GuildSettings) -> Option<GuildSettings> {
-        self.1.insert(settings.id, settings)
-    }
-
-    pub fn remove(&mut self, id: GuildId) -> Option<GuildSettings> {
-        self.1.remove(&id)
-    }
+    crate::apply_settings_update!("guilds");
+    crate::apply_settings_update_increase!("guilds");
 }
 
 #[derive(Clone, Debug)]

@@ -1,4 +1,5 @@
 use crate::lib::settings::Settings;
+use crate::lib::settings::SettingsHandler;
 use crate::lib::util::bucket::{Bucket, Ratelimit};
 use lazy_static;
 use serenity::model::prelude::*;

@@ -1,6 +1,7 @@
 use crate::lib::core::ThreadPoolContainer;
 use crate::lib::framework::LyrchFramework;
 use crate::lib::settings::Settings;
+use crate::lib::settings::SettingsHandler;
 use crate::serenity::framework::Framework;
 use serenity::model::prelude::*;
 use serenity::prelude::*;
