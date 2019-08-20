@@ -11,8 +11,6 @@ use serenity::{
 };
 use std::env;
 
-const VERSION: &str = "5.1.0 Nerom";
-
 #[derive(Debug, Deserialize)]
 struct WeebSh {
     status: u32,
@@ -31,6 +29,21 @@ struct WeebSh {
     url: String,
 }
 
+lazy_static! {
+    static ref CLIENT: reqwest::Client = reqwest::Client::new();
+    static ref HEADER_USER_AGENT: String = format!(
+        "Skyra/{type}/{version} ({codename})",
+        type = "Development",
+        version = "6.0.0",
+        codename = "Lyrch"
+    );
+    static ref HEADER_TOKEN: String = format!(
+        "Wolke {}",
+        env::var("WEEB_SH").expect("Expected a token in the environment")
+    )
+    .to_owned();
+}
+
 group!({
     name: "weeb",
     options: {},
@@ -40,24 +53,15 @@ group!({
 #[command]
 #[only_in(guilds)]
 pub fn wblush(ctx: &mut Context, msg: &Message) -> CommandResult {
-    lazy_static! {
-        static ref CLIENT: reqwest::Client = reqwest::Client::new();
-    }
-
     let url = format!(
         "https://api-v2.weeb.sh/images/random?type=blush&nsfw={}",
         msg.channel(&ctx).unwrap().is_nsfw()
     );
 
-    let token: String = format!(
-        "Wolke {}",
-        env::var("WEEB_SH").expect("Expected a token in the environment")
-    );
-    let user_agent = format!("Skyra/{}", VERSION);
     let res: WeebSh = CLIENT
         .get(&url)
-        .header(USER_AGENT, user_agent)
-        .header(AUTHORIZATION, token)
+        .header(USER_AGENT, HEADER_USER_AGENT.to_owned())
+        .header(AUTHORIZATION, HEADER_TOKEN.to_owned())
         .send()?
         .json()?;
 
