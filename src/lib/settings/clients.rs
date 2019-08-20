@@ -24,23 +24,24 @@ impl SettingsHandler for ClientSettingsHandler {
         "
     );
 
-    fn fetch(&self, id: impl AsRef<Self::Id>) -> Option<Self::Output> {
+    fn fetch(&self, id: impl AsRef<Self::Id>) -> Self::Output {
         let connection = self.0.lock().unwrap();
         let id = id.as_ref();
         if let Ok(result) = connection.query("SELECT * FROM users WHERE id = $1", &[&(id.0 as i64)])
         {
-            if result.is_empty() {
-                None
-            } else {
+            if !result.is_empty() {
                 let row = result.get(0);
-                Some(Self::Output {
+                return Self::Output {
                     id: *id,
                     boosts_guild: row.get(1),
                     boosts_users: row.get(2),
-                })
+                };
             }
-        } else {
-            None
+        }
+
+        Self::Output {
+            id: *id,
+            ..Self::Output::default()
         }
     }
 
@@ -48,7 +49,7 @@ impl SettingsHandler for ClientSettingsHandler {
     crate::apply_settings_update_increase!("clients");
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct ClientSettings {
     pub id: UserId,
     pub boosts_guild: Vec<i64>,

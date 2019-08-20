@@ -38,9 +38,8 @@ impl EventHandler for Handler {
     fn guild_create(&self, ctx: Context, guild: Guild, _is_new: bool) {
         let mut data = ctx.data.write();
         let settings = data.get_mut::<Settings>().unwrap();
-        if let Some(guild_settings) = settings.guilds.fetch(guild.id) {
-            settings.guilds.add(guild_settings);
-        }
+        let guild_settings = settings.guilds.fetch(guild.id);
+        settings.guilds.add(guild_settings);
     }
 
     fn guild_delete(

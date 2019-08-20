@@ -101,17 +101,15 @@ impl SettingsHandler for GuildSettingsHandler {
         "
     );
 
-    fn fetch(&self, id: impl AsRef<Self::Id>) -> Option<Self::Output> {
+    fn fetch(&self, id: impl AsRef<Self::Id>) -> Self::Output {
         let connection = self.0.lock().unwrap();
         let id = id.as_ref();
         if let Ok(result) =
             connection.query("SELECT * FROM guilds WHERE id = $1", &[&(id.0 as i64)])
         {
-            if result.is_empty() {
-                None
-            } else {
+            if !result.is_empty() {
                 let row = result.get(0);
-                Some(Self::Output {
+                return Self::Output {
                     id: *id,
                     prefix: row.get(1),
                     tags: from_value(row.get(2)).unwrap(),
@@ -177,10 +175,13 @@ impl SettingsHandler for GuildSettingsHandler {
                     starboard_ignore_channels: row.get(62),
                     trigger_alias: from_value(row.get(63)).unwrap(),
                     trigger_includes: from_value(row.get(64)).unwrap(),
-                })
-            }
-        } else {
-            None
+                };
+            };
+        }
+
+        Self::Output {
+            id: *id,
+            ..Self::Output::default()
         }
     }
 
@@ -188,7 +189,7 @@ impl SettingsHandler for GuildSettingsHandler {
     crate::apply_settings_update_increase!("guilds");
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct GuildSettings {
     pub id: GuildId,
     pub prefix: Option<String>,

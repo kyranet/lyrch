@@ -44,7 +44,7 @@ pub trait SettingsHandler {
     type Output;
 
     fn init(&self) -> ();
-    fn fetch(&self, id: impl AsRef<Self::Id>) -> Option<Self::Output>;
+    fn fetch(&self, id: impl AsRef<Self::Id>) -> Self::Output;
     fn update(
         &self,
         id: impl AsRef<Self::Id>,

@@ -104,35 +104,32 @@ impl SettingsHandler for UserSettingsHandler {
         "
     );
 
-    fn fetch(&self, id: impl AsRef<Self::Id>) -> Option<Self::Output> {
+    fn fetch(&self, id: impl AsRef<Self::Id>) -> Self::Output {
         let connection = self.0.lock().unwrap();
         let id = id.as_ref();
         if let Ok(result) = connection.query("SELECT * FROM users WHERE id = $1", &[&(id.0 as i64)])
         {
-            if result.is_empty() {
-                None
-            } else {
+            if !result.is_empty() {
                 let row = result.get(0);
-                let color: i32 = row.get(5);
-                let money_count: i32 = row.get(6);
-                let point_count: i32 = row.get(7);
-                let reputation_count: i32 = row.get(8);
-                Some(Self::Output {
+                return Self::Output {
                     id: *id,
                     banner_set: row.get(1),
                     banner_list: row.get(2),
                     badge_set: row.get(3),
                     badge_list: row.get(4),
-                    color: color as u32,
-                    money_count: money_count as u32,
-                    point_count: point_count as u32,
-                    reputation_count: reputation_count as u32,
+                    color: row.get(5),
+                    money_count: row.get(6),
+                    point_count: row.get(7),
+                    reputation_count: row.get(8),
                     next_daily: row.get(9),
                     next_reputation: row.get(10),
-                })
+                };
             }
-        } else {
-            None
+        }
+
+        Self::Output {
+            id: *id,
+            ..Self::Output::default()
         }
     }
 
@@ -140,17 +137,17 @@ impl SettingsHandler for UserSettingsHandler {
     crate::apply_settings_update_increase!("users");
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct UserSettings {
     pub id: UserId,
     pub banner_set: Option<String>,
     pub banner_list: Vec<String>,
     pub badge_set: Vec<String>,
     pub badge_list: Vec<String>,
-    pub color: u32,
-    pub money_count: u32,
-    pub point_count: u32,
-    pub reputation_count: u32,
+    pub color: i32,
+    pub money_count: i32,
+    pub point_count: i32,
+    pub reputation_count: i32,
     pub next_daily: Option<NaiveDateTime>,
     pub next_reputation: Option<NaiveDateTime>,
 }
