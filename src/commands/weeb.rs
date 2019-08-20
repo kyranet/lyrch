@@ -1,6 +1,7 @@
 use reqwest::header::{AUTHORIZATION, USER_AGENT};
 use serde::Deserialize;
 use serenity::prelude::*;
+use serenity::utils::Colour;
 use serenity::{
     framework::standard::{
         macros::{command, group},
@@ -9,7 +10,6 @@ use serenity::{
     model::channel::Message,
 };
 use std::env;
-use serenity::utils::Colour;
 
 const VERSION: &str = "5.1.0 Nerom";
 
