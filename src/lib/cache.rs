@@ -1,29 +1,28 @@
+use r2d2::Pool;
+use r2d2_redis::RedisConnectionManager;
 use serenity::prelude::*;
 use std::env;
 use std::ops::DerefMut;
-use std::sync::Arc;
 
-pub struct RedisConnection {
-    // client: Arc<Mutex<redis::Client>>,
-    connection: Arc<Mutex<redis::Connection>>,
+pub struct RedisConnection(pub Pool<RedisConnectionManager>);
+
+impl TypeMapKey for RedisConnection {
+    type Value = RedisConnection;
 }
 
 impl RedisConnection {
     pub fn new() -> Self {
         let url = &env::var("REDIS_URL").expect("Expected REDIS_URL to be set.")[..];
-        let client = redis::Client::open(url).unwrap();
-        let connection = client.get_connection().unwrap();
-        Self {
-            // client: Arc::new(Mutex::new(client)),
-            connection: Arc::new(Mutex::new(connection)),
-        }
+        let manager = RedisConnectionManager::new(url).unwrap();
+        let pool = Pool::new(manager).unwrap();
+        Self(pool)
     }
 
     pub fn query<T>(&self, cmd: &mut redis::Cmd) -> redis::RedisResult<T>
     where
         T: redis::FromRedisValue,
     {
-        let mut conn = self.connection.lock();
+        let mut conn = self.0.clone().get().unwrap();
         cmd.query(conn.deref_mut())
     }
 
@@ -36,7 +35,7 @@ impl RedisConnection {
     where
         K: redis::ToRedisArgs + Copy,
     {
-        let mut conn = self.connection.lock();
+        let mut conn = self.0.clone().get().unwrap();
         redis::pipe()
             .atomic()
             .add_command(redis::cmd("SET"))
@@ -49,8 +48,4 @@ impl RedisConnection {
             .ignore()
             .execute(conn.deref_mut());
     }
-}
-
-impl TypeMapKey for RedisConnection {
-    type Value = RedisConnection;
 }
