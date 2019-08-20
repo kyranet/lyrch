@@ -8,20 +8,23 @@ use serenity::{
 };
 use reqwest::header::{USER_AGENT, AUTHORIZATION};
 use std::env;
-use serenity::serde::{Deserialize, Serialize};
+use serde::{Deserialize};
 
 const VERSION: &str = "5.1.0 Nerom";
 
-#[derive(Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[derive(Debug)]
+#[derive(Deserialize)]
 struct WeebSh {
     status: u32,
     id: String,
-    type: String,
-    baseType: String,
+    r#type: String,
+    #[serde(rename(deserialize = "baseType"))]
+    base_type: String,
     nsfw: bool,
-    fileType: String,
-    mimeType: String,
+    #[serde(rename(deserialize = "fileType"))]
+    file_type: String,
+    #[serde(rename(deserialize = "mimeType"))]
+    mime_type: String,
     account: String,
     hidden: bool,
     tags: Vec<String>,
@@ -48,13 +51,15 @@ pub fn wblush(ctx: &mut Context, msg: &Message) -> CommandResult {
 
     let token: String = format!("Wolke {}", env::var("WEEB_SH").expect("Expected a token in the environment"));
     let user_agent = format!("Skyra/{}", VERSION);
-    let res = CLIENT.get(&url)
+    let res: WeebSh = CLIENT.get(&url)
         .header(USER_AGENT, user_agent)
         .header(AUTHORIZATION, token)
         .send()?
         .json()?;
 
-    print!("please stop breaking");
-    println!("my res {:?}", res);
+    match msg.channel_id.say(&ctx.http, &res.url) {
+        Err(error) => println!("Something went wrong: {:?}", error),
+        Ok(_message) => println!("Sent blush random image"),
+    };
     Ok(())
 }
