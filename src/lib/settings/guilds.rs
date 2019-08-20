@@ -4,7 +4,8 @@ use postgres::Connection;
 use serde_json::from_value;
 use serenity::model::prelude::*;
 use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
+use serenity::prelude::*;
+use std::sync::Arc;
 
 pub struct GuildSettingsHandler(Arc<Mutex<Connection>>, HashMap<GuildId, GuildSettings>);
 
@@ -102,7 +103,7 @@ impl SettingsHandler for GuildSettingsHandler {
     );
 
     fn fetch(&self, id: impl AsRef<Self::Id>) -> Self::Output {
-        let connection = self.0.lock().unwrap();
+        let connection = self.0.lock();
         let id = id.as_ref();
         if let Ok(result) =
             connection.query("SELECT * FROM guilds WHERE id = $1", &[&(id.0 as i64)])

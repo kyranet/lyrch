@@ -3,7 +3,8 @@ use chrono::prelude::*;
 use postgres::Connection;
 use serenity::model::prelude::*;
 use std::error::Error;
-use std::sync::{Arc, Mutex};
+use serenity::prelude::*;
+use std::sync::Arc;
 
 pub struct UserSettingsHandler(Arc<Mutex<Connection>>);
 
@@ -13,7 +14,7 @@ impl UserSettingsHandler {
     }
 
     pub fn retrieve_user_money_count(&self, id: UserId) -> u32 {
-        let connection = self.0.lock().unwrap();
+        let connection = self.0.lock();
         if let Ok(result) = connection.query(
             "SELECT money_count FROM users WHERE id = $1",
             &[&(id.0 as i64)],
@@ -32,7 +33,7 @@ impl UserSettingsHandler {
 
     pub fn try_daily(&self, id: UserId) -> Result<(), String> {
         let id = &(id.0 as i64);
-        let connection = self.0.lock().unwrap();
+        let connection = self.0.lock();
         let result = connection
             .query("SELECT next_daily FROM users WHERE id = $1", &[id])
             .map_err(|e| e.description().to_owned())?;
@@ -105,7 +106,7 @@ impl SettingsHandler for UserSettingsHandler {
     );
 
     fn fetch(&self, id: impl AsRef<Self::Id>) -> Self::Output {
-        let connection = self.0.lock().unwrap();
+        let connection = self.0.lock();
         let id = id.as_ref();
         if let Ok(result) = connection.query("SELECT * FROM users WHERE id = $1", &[&(id.0 as i64)])
         {

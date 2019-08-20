@@ -6,7 +6,7 @@ use postgres::types::ToSql;
 use postgres::{Connection, TlsMode};
 use serenity::prelude::*;
 use std::env;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
 pub struct Settings {
     pub connection: Arc<Mutex<Connection>>,
@@ -63,7 +63,7 @@ pub trait SettingsHandler {
 macro_rules! apply_settings_init {
     ($table:expr, $schema:expr) => {
         fn init(&self) {
-            let connection = self.0.lock().unwrap();
+            let connection = self.0.lock();
             connection
                 .execute(
                     concat!("CREATE TABLE IF NOT EXISTS ", $table, " (\n", $schema, "\n)"),
@@ -72,9 +72,9 @@ macro_rules! apply_settings_init {
                 .unwrap();
         }
     };
-    ($table:expr, $schema:expr, $($index_name:tt => $index_content:tt)+) => {
+    ($table:expr, $schema:expr, $($index_name:tt => $index_content:tt)*) => {
         fn init(&self) {
-            let connection = self.0.lock().unwrap();
+            let connection = self.0.lock();
             connection
                 .execute(
                     concat!("CREATE TABLE IF NOT EXISTS ", $table, " (\n", $schema, "\n)"),
@@ -105,7 +105,7 @@ macro_rules! apply_settings_init {
 macro_rules! apply_settings_update {
     ($table:expr) => {
         fn update(&self, id: impl AsRef<Self::Id>, key: &str, value: &dyn postgres::types::ToSql) -> Result<(), postgres::Error> {
-            let connection = self.0.lock().unwrap();
+            let connection = self.0.lock();
             connection.execute(
                 format!(concat!("INSERT INTO ", $table, " (id, {key})
                         VALUES ($1, $2)
@@ -122,7 +122,7 @@ macro_rules! apply_settings_update {
 macro_rules! apply_settings_update_increase {
     ($table:expr) => {
         fn update_increase(&self, id: impl AsRef<Self::Id>, key: &str, value: &dyn postgres::types::ToSql) -> Result<(), postgres::Error> {
-            let connection = self.0.lock().unwrap();
+            let connection = self.0.lock();
             connection.execute(
                 format!(concat!("INSERT INTO ", $table, " (id, {key})
                         VALUES ($1, $2)
