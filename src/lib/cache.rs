@@ -19,7 +19,7 @@ impl RedisConnection {
         }
     }
 
-    pub fn query<T>(&mut self, cmd: &mut redis::Cmd) -> redis::RedisResult<T>
+    pub fn query<T>(&self, cmd: &mut redis::Cmd) -> redis::RedisResult<T>
     where
         T: redis::FromRedisValue,
     {
@@ -32,7 +32,7 @@ impl RedisConnection {
     //     cmd.execute(conn.deref_mut());
     // }
 
-    pub fn set_ttl<K>(&mut self, key: K, value: K, ttl: u32)
+    pub fn set_ttl<K>(&self, key: K, value: K, ttl: u32)
     where
         K: redis::ToRedisArgs + Copy,
     {

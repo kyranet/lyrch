@@ -22,18 +22,18 @@ group!({
 
 #[command]
 pub fn daily(ctx: &mut Context, msg: &Message) -> CommandResult {
-    let mut data = ctx.data.write();
+    let data = ctx.data.read();
     let settings = data.get::<Settings>().unwrap();
     match settings.users.try_daily(msg.author.id) {
         Ok(_) => try_send_message_context!(
             ctx,
             msg,
-            data.get_mut::<RedisConnection>().unwrap(),
+            data.get::<RedisConnection>().unwrap(),
             "Yay! You received 200 {}!",
             SHINY
         ),
         Err(err) => {
-            try_send_message_context!(ctx, msg, data.get_mut::<RedisConnection>().unwrap(), err)
+            try_send_message_context!(ctx, msg, data.get::<RedisConnection>().unwrap(), err)
         }
     };
 
@@ -42,13 +42,13 @@ pub fn daily(ctx: &mut Context, msg: &Message) -> CommandResult {
 
 #[command]
 pub fn credits(ctx: &mut Context, msg: &Message) -> CommandResult {
-    let mut data = ctx.data.write();
+    let data = ctx.data.read();
     let settings = data.get::<Settings>().unwrap();
     let amount = settings.users.retrieve_user_money_count(msg.author.id);
     try_send_message_context!(
         ctx,
         msg,
-        data.get_mut::<RedisConnection>().unwrap(),
+        data.get::<RedisConnection>().unwrap(),
         "You have a total of {} {}",
         amount,
         SHINY
@@ -60,7 +60,7 @@ pub fn credits(ctx: &mut Context, msg: &Message) -> CommandResult {
 #[usage = "[user]"]
 #[bucket = "social.profile"]
 pub fn profile(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {
-    let mut data = ctx.data.write();
+    let data = ctx.data.read();
     let settings = data.get::<Settings>().unwrap();
     let point_count: u32;
     let level: u32;
@@ -88,7 +88,7 @@ pub fn profile(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {
         progress = 0_f32;
     }
 
-    try_send_message_context!(ctx, msg, data.get_mut::<RedisConnection>().unwrap(), "[ {user_name} ] **Level**: {level} | `{level_previous}..{point_count}..{level_next}` `[{progress}]`",
+    try_send_message_context!(ctx, msg, data.get::<RedisConnection>().unwrap(), "[ {user_name} ] **Level**: {level} | `{level_previous}..{point_count}..{level_next}` `[{progress}]`",
         level = level,
         level_previous = level_previous,
         level_next = level_next,
