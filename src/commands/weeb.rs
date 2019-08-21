@@ -41,8 +41,7 @@ lazy_static! {
     static ref HEADER_TOKEN: String = format!(
         "Wolke {}",
         env::var("WEEB_SH").expect("Expected a token in the environment")
-    )
-    .to_owned();
+    );
 }
 
 macro_rules! create_weeb_command {
