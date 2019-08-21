@@ -82,8 +82,8 @@ macro_rules! create_weeb_command {
                         })
                     })
                 }) {
-                    Err(error) => println!("Something went wrong: {:?}", error),
-                    Ok(_message) => println!("Sent blush random image"),
+                    Err(error) => crate::log!("Something went wrong: {:?}", error),
+                    Ok(_message) => crate::log!("Sent blush random image"),
                 };
                 Ok(())
             }
@@ -173,8 +173,8 @@ pub fn wblush(ctx: &mut Context, msg: &Message) -> CommandResult {
             })
         })
     }) {
-        Err(error) => println!("Something went wrong: {:?}", error),
-        Ok(_message) => println!("Sent blush random image"),
+        Err(error) => crate::log!("Something went wrong: {:?}", error),
+        Ok(_message) => crate::log!("Sent blush random image"),
     };
     Ok(())
 }

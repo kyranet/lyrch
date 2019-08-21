@@ -12,7 +12,7 @@ pub struct Handler;
 
 impl EventHandler for Handler {
     fn ready(&self, ctx: Context, ready: Ready) {
-        println!("{} is connected!", ready.user.name);
+        crate::log!("{} is connected!", ready.user.name);
         ctx.cache.write().settings_mut().max_messages(50);
     }
 
