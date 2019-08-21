@@ -133,7 +133,7 @@ pub fn configure(
         .owners(owners)
 }
 
-pub fn attach_data(client: &Client, framework: lib::framework::LyrchFramework) {
+pub fn attach_data(client: &mut Client, framework: lib::framework::LyrchFramework) {
     use lib::{
         cache, core, framework,
         settings::{
@@ -141,6 +141,10 @@ pub fn attach_data(client: &Client, framework: lib::framework::LyrchFramework) {
             users::UserSettingsHandler, Settings,
         },
     };
+
+    if let Ok(amount) = env::var("THREADS").unwrap_or("5".to_owned()).parse::<usize>() {
+        client.threadpool.set_num_threads(amount);
+    }
 
     let settings = Settings::new();
     let mut data = client.data.write();
