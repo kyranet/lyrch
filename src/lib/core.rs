@@ -32,7 +32,8 @@ pub fn create_framework(owners: HashSet<UserId>, bot_id: UserId) -> StandardFram
         .before(move |ctx, msg, command_name| {
             crate::debug!(
                 "Got command '{}' by user '{}'",
-                command_name, msg.author.name
+                command_name,
+                msg.author.name
             );
 
             {

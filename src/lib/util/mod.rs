@@ -1,8 +1,8 @@
 pub mod bucket;
 pub mod event_handlers;
+pub mod logger;
 pub mod macros;
 pub mod resolvers;
-pub mod logger;
 
 use std::iter::repeat;
 
