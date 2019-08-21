@@ -1,6 +1,7 @@
 extern crate bit_vec;
 extern crate chrono;
 extern crate dotenv;
+extern crate hey_listen;
 extern crate postgres;
 extern crate r2d2;
 extern crate r2d2_postgres;
@@ -9,12 +10,14 @@ extern crate redis;
 extern crate regex;
 extern crate serde_json;
 extern crate serenity;
+extern crate white_rabbit;
 #[macro_use]
 extern crate lazy_static;
 
 mod commands;
 mod lib;
 mod monitors;
+mod tasks;
 
 use lib::core::{attach_data, create_framework, fetch_application_data, initialize_client};
 

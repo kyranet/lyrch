@@ -97,9 +97,7 @@ pub fn create_framework(owners: HashSet<UserId>, bot_id: UserId) -> StandardFram
         .group(&commands::general::GENERAL_GROUP)
         .group(&commands::social::SOCIAL_GROUP)
         .group(&commands::weeb::WEEB_GROUP)
-    // .group(&EMOJI_GROUP)
-    // .group(&MATH_GROUP)
-    // .group(&OWNER_GROUP)
+        .group(&commands::misc::MISC_GROUP)
 }
 
 pub fn configure(
@@ -136,6 +134,7 @@ pub fn configure(
 pub fn attach_data(client: &mut Client, framework: lib::framework::LyrchFramework) {
     use lib::{
         cache, core, framework,
+        schedule::{self, DispatcherKey, SchedulerKey},
         settings::{
             clients::ClientSettingsHandler, guilds::GuildSettingsHandler,
             users::UserSettingsHandler, Settings,
@@ -143,7 +142,7 @@ pub fn attach_data(client: &mut Client, framework: lib::framework::LyrchFramewor
     };
 
     if let Ok(amount) = env::var("THREADS")
-        .unwrap_or("5".to_owned())
+        .unwrap_or_else(|_| "5".to_owned())
         .parse::<usize>()
     {
         client.threadpool.set_num_threads(amount);
@@ -160,6 +159,8 @@ pub fn attach_data(client: &mut Client, framework: lib::framework::LyrchFramewor
     data.insert::<core::ShardManagerContainer>(Arc::clone(&client.shard_manager));
     data.insert::<core::ThreadPoolContainer>(Arc::new(Mutex::new(client.threadpool.clone())));
     data.insert::<framework::LyrchFramework>(framework);
+    data.insert::<DispatcherKey>(schedule::create_dispatcher());
+    data.insert::<SchedulerKey>(schedule::create_scheduler());
 }
 
 pub struct ShardManagerContainer;
