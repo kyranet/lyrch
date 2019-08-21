@@ -142,7 +142,10 @@ pub fn attach_data(client: &mut Client, framework: lib::framework::LyrchFramewor
         },
     };
 
-    if let Ok(amount) = env::var("THREADS").unwrap_or("5".to_owned()).parse::<usize>() {
+    if let Ok(amount) = env::var("THREADS")
+        .unwrap_or("5".to_owned())
+        .parse::<usize>()
+    {
         client.threadpool.set_num_threads(amount);
     }
 

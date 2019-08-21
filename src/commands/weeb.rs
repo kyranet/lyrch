@@ -72,19 +72,15 @@ macro_rules! create_weeb_command {
                     .send()?
                     .json()?;
 
-                match msg.channel_id.send_message(&ctx, |m| {
-                    m.embed(|e| {
-                        e.image(res.url);
-                        e.color(Colour::from_rgb(110, 136, 216));
-                        e.footer(|f| {
-                            f.text("Powered by weeb.sh");
-                            f
-                        })
+                crate::try_send_message_embed!(ctx, msg, |e| {
+                    e.image(res.url);
+                    e.color(Colour::from_rgb(110, 136, 216));
+                    e.footer(|f| {
+                        f.text("Powered by weeb.sh");
+                        f
                     })
-                }) {
-                    Err(error) => crate::wtf!("Something went wrong: {:?}", error),
-                    Ok(_message) => crate::verbose!("Sent blush random image"),
-                };
+                })?;
+
                 Ok(())
             }
         )*

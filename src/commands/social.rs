@@ -2,7 +2,7 @@ use crate::lib::cache::RedisConnection;
 use crate::lib::settings::users::UserSettingsHandler;
 use crate::lib::settings::SettingsHandler;
 use crate::lib::util::{percentage, resolvers::resolve_user};
-use crate::try_send_message_context;
+use crate::try_ctx_send_message_content;
 use serenity::prelude::*;
 use serenity::{
     framework::standard::{
@@ -25,15 +25,15 @@ pub fn daily(ctx: &mut Context, msg: &Message) -> CommandResult {
     let data = ctx.data.read();
     let settings = data.get::<UserSettingsHandler>().unwrap();
     match settings.try_daily(msg.author.id) {
-        Ok(_) => try_send_message_context!(
+        Ok(_) => try_ctx_send_message_content!(
             ctx,
             msg,
             data.get::<RedisConnection>().unwrap(),
             "Yay! You received 200 {}!",
             SHINY
-        ),
+        )?,
         Err(err) => {
-            try_send_message_context!(ctx, msg, data.get::<RedisConnection>().unwrap(), err)
+            try_ctx_send_message_content!(ctx, msg, data.get::<RedisConnection>().unwrap(), err)?
         }
     };
 
@@ -45,14 +45,14 @@ pub fn credits(ctx: &mut Context, msg: &Message) -> CommandResult {
     let data = ctx.data.read();
     let settings = data.get::<UserSettingsHandler>().unwrap();
     let amount = settings.retrieve_user_money_count(msg.author.id);
-    try_send_message_context!(
+    try_ctx_send_message_content!(
         ctx,
         msg,
         data.get::<RedisConnection>().unwrap(),
         "You have a total of {} {}",
         amount,
         SHINY
-    );
+    )?;
     Ok(())
 }
 
@@ -77,7 +77,7 @@ pub fn profile(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {
     let level_next = ((level + 1) as f32 / 0.2).powf(2.0).floor() as i32;
     let progress = (point_count - level_previous) as f32 / (level_next - level_previous) as f32;
 
-    try_send_message_context!(ctx, msg, data.get::<RedisConnection>().unwrap(),
+    try_ctx_send_message_content!(ctx, msg, data.get::<RedisConnection>().unwrap(),
         "[ {user_name} ] **Level**: {level} | `{level_previous}..{point_count}..{level_next}` `[{progress}]`",
         level = level,
         level_previous = level_previous,
@@ -85,6 +85,6 @@ pub fn profile(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {
         progress = percentage(35, progress),
         point_count = point_count,
         user_name = user_name
-    );
+    )?;
     Ok(())
 }

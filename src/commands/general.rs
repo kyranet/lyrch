@@ -1,4 +1,4 @@
-use crate::try_send_message;
+use crate::try_send_message_content;
 use serenity::{
     framework::standard::{
         help_commands,
@@ -20,15 +20,15 @@ group!({
 #[command]
 #[only_in(guilds)]
 pub fn ping(ctx: &mut Context, msg: &Message) -> CommandResult {
-    let response = try_send_message!(ctx, msg, "Ping...");
+    let response = try_send_message_content!(ctx, msg, "Ping...")?;
     let latency = (response.timestamp - msg.timestamp).num_milliseconds();
-    try_send_message!(ctx, msg, "Pong! Took: {}ms!", latency);
+    try_send_message_content!(ctx, msg, "Pong! Took: {}ms!", latency)?;
     Ok(())
 }
 
 #[command]
 pub fn about(ctx: &mut Context, msg: &Message) -> CommandResult {
-    try_send_message!(ctx, msg, "This is a small test-bot! :)");
+    try_send_message_content!(ctx, msg, "This is a small test-bot! :)")?;
     Ok(())
 }
 
