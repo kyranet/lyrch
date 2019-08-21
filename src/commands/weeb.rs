@@ -32,10 +32,11 @@ struct WeebSh {
 lazy_static! {
     static ref CLIENT: reqwest::Client = reqwest::Client::new();
     static ref HEADER_USER_AGENT: String = format!(
-        "Skyra/{type}/{version} ({codename})",
-        type = "Development",
-        version = "6.0.0",
-        codename = "Lyrch"
+        "{name}/{type}/{version} ({codename})",
+        name = env::var("CLIENT_NAME").expect("Expected the `CLIENT_NAME` variable to be set in `.env`."),
+        type = env::var("KIND").expect("Expected the `KIND` variable to be set in `.env`."),
+        version = env::var("VERSION").expect("Expected the `VERSION` variable to be set in `.env`."),
+        codename = env::var("CODENAME").expect("Expected the `CODENAME` variable to be set in `.env`.")
     );
     static ref HEADER_TOKEN: String = format!(
         "Wolke {}",
