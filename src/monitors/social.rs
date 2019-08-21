@@ -21,9 +21,9 @@ pub fn social_points(ctx: &mut Context, msg: &Message) -> bool {
         let data = ctx.data.read();
         let settings = data.get::<UserSettingsHandler>().unwrap();
         if let Err(err) = settings.update_increase(msg.author.id, "point_count", &5) {
-            crate::log!("Failed to update points for {}: {}", msg.author.id, err);
+            crate::wtf!("Failed to update points for {}: {}", msg.author.id, err);
         } else {
-            crate::log!("Updated points for {}", msg.author.id)
+            crate::debug!("Updated points for {}", msg.author.id)
         }
     }
 

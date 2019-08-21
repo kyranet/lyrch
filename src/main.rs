@@ -29,6 +29,6 @@ fn main() {
     client.with_framework(framework);
 
     if let Err(why) = client.start() {
-        crate::log!("Client error: {:?}", why);
+        crate::wtf!("Client error: {:?}", why);
     }
 }

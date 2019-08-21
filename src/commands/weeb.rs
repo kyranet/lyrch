@@ -82,8 +82,8 @@ macro_rules! create_weeb_command {
                         })
                     })
                 }) {
-                    Err(error) => crate::log!("Something went wrong: {:?}", error),
-                    Ok(_message) => crate::log!("Sent blush random image"),
+                    Err(error) => crate::wtf!("Something went wrong: {:?}", error),
+                    Ok(_message) => crate::verbose!("Sent blush random image"),
                 };
                 Ok(())
             }
@@ -146,35 +146,4 @@ create_weeb_command! {
     wag;
     waifu_insult;
     wasted;
-}
-
-#[command]
-#[only_in(guilds)]
-pub fn wblush(ctx: &mut Context, msg: &Message) -> CommandResult {
-    let url = format!(
-        "https://api-v2.weeb.sh/images/random?type=blush&nsfw={}",
-        msg.channel(&ctx).unwrap().is_nsfw()
-    );
-
-    let res: WeebSh = CLIENT
-        .get(&url)
-        .header(USER_AGENT, HEADER_USER_AGENT.to_owned())
-        .header(AUTHORIZATION, HEADER_TOKEN.to_owned())
-        .send()?
-        .json()?;
-
-    match msg.channel_id.send_message(&ctx, |m| {
-        m.embed(|e| {
-            e.image(res.url);
-            e.color(Colour::from_rgb(110, 136, 216));
-            e.footer(|f| {
-                f.text("Powered by weeb.sh");
-                f
-            })
-        })
-    }) {
-        Err(error) => crate::log!("Something went wrong: {:?}", error),
-        Ok(_message) => crate::log!("Sent blush random image"),
-    };
-    Ok(())
 }
