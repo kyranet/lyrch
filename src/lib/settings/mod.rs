@@ -1,5 +1,6 @@
 pub mod clients;
 pub mod guilds;
+pub mod reminders;
 pub mod users;
 
 use postgres::types::ToSql;
@@ -81,6 +82,24 @@ macro_rules! apply_settings_init {
                     )
                     .unwrap();
             )*
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! apply_settings_fetch {
+    ($table:expr) => {
+        fn fetch(&self, id: impl AsRef<Self::Id>) -> Self::Output {
+            let connection = self.0.clone().get().unwrap();
+            let id = id.as_ref();
+            if let Ok(result) = connection.query(concat!("SELECT * FROM ", $table, " WHERE id = $1"), &[&(id.0 as i64)])
+            {
+                if !result.is_empty() {
+                    serde_postgres::from_row(result.get(0)).unwrap()
+                }
+            }
+
+            Self::Output { id: *id, ..Self::Output::default() }
         }
     };
 }

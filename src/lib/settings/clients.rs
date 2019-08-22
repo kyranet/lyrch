@@ -29,27 +29,7 @@ impl SettingsHandler for ClientSettingsHandler {
         "
     );
 
-    fn fetch(&self, id: impl AsRef<Self::Id>) -> Self::Output {
-        let connection = self.0.clone().get().unwrap();
-        let id = id.as_ref();
-        if let Ok(result) = connection.query("SELECT * FROM users WHERE id = $1", &[&(id.0 as i64)])
-        {
-            if !result.is_empty() {
-                let row = result.get(0);
-                return Self::Output {
-                    id: *id,
-                    boosts_guild: row.get(1),
-                    boosts_users: row.get(2),
-                };
-            }
-        }
-
-        Self::Output {
-            id: *id,
-            ..Self::Output::default()
-        }
-    }
-
+    crate::apply_settings_fetch!("clients");
     crate::apply_settings_update!("clients");
     crate::apply_settings_update_increase!("clients");
 }

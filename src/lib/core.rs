@@ -137,7 +137,7 @@ pub fn attach_data(client: &mut Client, framework: lib::framework::LyrchFramewor
         schedule::{self, DispatcherKey, SchedulerKey},
         settings::{
             clients::ClientSettingsHandler, guilds::GuildSettingsHandler,
-            users::UserSettingsHandler, Settings,
+            reminders::RemindersSettingsHandler, users::UserSettingsHandler, Settings,
         },
     };
 
@@ -153,6 +153,7 @@ pub fn attach_data(client: &mut Client, framework: lib::framework::LyrchFramewor
     data.insert::<ClientSettingsHandler>(ClientSettingsHandler::new(settings.0.clone()));
     data.insert::<GuildSettingsHandler>(GuildSettingsHandler::new(settings.0.clone()));
     data.insert::<UserSettingsHandler>(UserSettingsHandler::new(settings.0.clone()));
+    data.insert::<RemindersSettingsHandler>(RemindersSettingsHandler::new(settings.0.clone()));
     data.insert::<Settings>(settings);
     data.insert::<cache::RedisConnection>(lib::cache::RedisConnection::new());
     data.insert::<core::CommandCounter>(HashMap::default());
