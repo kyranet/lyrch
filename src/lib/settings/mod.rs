@@ -28,8 +28,14 @@ pub trait SettingsHandler {
     type Id;
     type Output;
 
-    fn init(&self) -> ();
+    fn init(self) -> Self;
     fn fetch(&self, id: impl AsRef<Self::Id>) -> Self::Output;
+    fn insert(
+        &self,
+        id: impl AsRef<Self::Id>,
+        keys: &[&'static str],
+        values: &[&dyn postgres::types::ToSql],
+    ) -> Result<(), postgres::Error>;
     fn update(
         &self,
         id: impl AsRef<Self::Id>,
@@ -47,7 +53,7 @@ pub trait SettingsHandler {
 #[macro_export]
 macro_rules! apply_settings_init {
     ($table:expr, $schema:expr) => {
-        fn init(&self) {
+        fn init(self) -> Self {
             let connection = self.0.clone().get().unwrap();
             connection
                 .execute(
@@ -55,10 +61,11 @@ macro_rules! apply_settings_init {
                     &[]
                 )
                 .unwrap();
+            self
         }
     };
     ($table:expr, $schema:expr, $($index_name:tt => $index_content:tt)*) => {
-        fn init(&self) {
+        fn init(self) -> Self {
             let connection = self.0.clone().get().unwrap();
             connection
                 .execute(
@@ -82,6 +89,7 @@ macro_rules! apply_settings_init {
                     )
                     .unwrap();
             )*
+            self
         }
     };
 }
@@ -100,6 +108,47 @@ macro_rules! apply_settings_fetch {
             }
 
             Self::Output { id: *id, ..Self::Output::default() }
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! apply_settings_insert {
+    ($table:expr) => {
+        fn insert(
+            &self,
+            id: impl AsRef<Self::Id>,
+            keys: &[&'static str],
+            values: &[&dyn postgres::types::ToSql],
+        ) -> Result<(), postgres::Error> {
+            use std::fmt::Write;
+            let connection = self.0.clone().get().unwrap();
+
+            let mut i = 2;
+            let mut map_keys = String::new();
+            let mut map_params = String::new();
+            let mut keys_iter = keys.iter();
+            if let Some(key) = keys_iter.next() {
+                write!(&mut map_keys, "{}", key).unwrap();
+                write!(&mut map_params, "${}", i).unwrap();
+
+                for key in keys_iter {
+                    i += 1;
+                    write!(&mut map_keys, ", {}", key).unwrap();
+                    write!(&mut map_params, ", ${}", i).unwrap();
+                }
+            }
+
+            let mut expanded_values: Vec<&dyn postgres::types::ToSql> = Vec::with_capacity(keys.len());
+            let id = id.as_ref().0 as i64;
+            expanded_values.push(&id);
+            expanded_values.extend(values);
+            connection.execute(
+                format!(concat!("INSERT INTO ", $table, " (id, {keys})
+                        VALUES ($1, {params});"), keys = map_keys, params = map_params).as_str(),
+                    &expanded_values
+            )?;
+            Ok(())
         }
     };
 }

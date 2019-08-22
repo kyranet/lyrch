@@ -1,5 +1,6 @@
 use crate::commands;
 use crate::lib;
+use crate::lib::settings::SettingsHandler;
 use serenity::client::bridge::gateway::ShardManager;
 use serenity::framework::standard::*;
 use serenity::model::prelude::*;
@@ -49,15 +50,19 @@ pub fn create_framework(owners: HashSet<UserId>, bot_id: UserId) -> StandardFram
         })
         // Similar to `before`, except will be called directly _after_
         // command execution.
-        .after(|_, _, command_name, error| match error {
-            Ok(()) => crate::verbose!("Processed command '{}'", command_name),
-            Err(why) => crate::wtf!("Command '{}' returned error {:?}", command_name, why),
+        .after(|ctx, msg, command_name, error| {
+            if let Err(why) = error {
+                crate::wtf!("Command '{}' returned error {:?}", command_name, why);
+                let _ = msg.channel_id.say(
+                    &ctx.http,
+                    &format!("Whoops! I'm very sorry, something happened: `{}`", why.0),
+                );
+            }
         })
-        .prefix_only(move |ctx, message| {
-            if let Some(user) = message.mentions.first() {
+        .prefix_only(move |ctx, msg| {
+            if let Some(user) = msg.mentions.first() {
                 if user.id == bot_id {
-                    message
-                        .channel_id
+                    msg.channel_id
                         .say(
                             &ctx.http,
                             &format!("The prefix is `{}`", env::var("PREFIX").unwrap()),
@@ -72,8 +77,8 @@ pub fn create_framework(owners: HashSet<UserId>, bot_id: UserId) -> StandardFram
             crate::verbose!("Could not find command named '{}'", unknown_command_name);
         })
         // Set a function that's called whenever a message is not a command.
-        .normal_message(|ctx, message| {
-            crate::monitors::run(ctx, message);
+        .normal_message(|ctx, msg| {
+            crate::monitors::run(ctx, msg);
         })
         // Set a function that's called whenever a command's execution didn't complete for one
         // reason or another. For example, when a user has exceeded a rate-limit or a command
@@ -150,10 +155,12 @@ pub fn attach_data(client: &mut Client, framework: lib::framework::LyrchFramewor
 
     let settings = Settings::new();
     let mut data = client.data.write();
-    data.insert::<ClientSettingsHandler>(ClientSettingsHandler::new(settings.0.clone()));
-    data.insert::<GuildSettingsHandler>(GuildSettingsHandler::new(settings.0.clone()));
-    data.insert::<UserSettingsHandler>(UserSettingsHandler::new(settings.0.clone()));
-    data.insert::<RemindersSettingsHandler>(RemindersSettingsHandler::new(settings.0.clone()));
+    data.insert::<ClientSettingsHandler>(ClientSettingsHandler::new(settings.0.clone()).init());
+    data.insert::<GuildSettingsHandler>(GuildSettingsHandler::new(settings.0.clone()).init());
+    data.insert::<UserSettingsHandler>(UserSettingsHandler::new(settings.0.clone()).init());
+    data.insert::<RemindersSettingsHandler>(
+        RemindersSettingsHandler::new(settings.0.clone()).init(),
+    );
     data.insert::<Settings>(settings);
     data.insert::<cache::RedisConnection>(lib::cache::RedisConnection::new());
     data.insert::<core::CommandCounter>(HashMap::default());

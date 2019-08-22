@@ -31,6 +31,7 @@ impl SettingsHandler for ClientSettingsHandler {
     );
 
     crate::apply_settings_fetch!("clients");
+    crate::apply_settings_insert!("clients");
     crate::apply_settings_update!("clients");
     crate::apply_settings_update_increase!("clients");
 }

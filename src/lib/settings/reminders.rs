@@ -6,6 +6,7 @@ use serde::*;
 use serenity::model::prelude::*;
 use serenity::prelude::*;
 
+#[derive(Clone, Debug)]
 pub struct RemindersSettingsHandler(pub Pool<PostgresConnectionManager>);
 
 impl RemindersSettingsHandler {
@@ -31,9 +32,10 @@ impl SettingsHandler for RemindersSettingsHandler {
         "
     );
 
-    crate::apply_settings_fetch!("schedules");
-    crate::apply_settings_update!("schedules");
-    crate::apply_settings_update_increase!("schedules");
+    crate::apply_settings_fetch!("reminders");
+    crate::apply_settings_insert!("reminders");
+    crate::apply_settings_update!("reminders");
+    crate::apply_settings_update_increase!("reminders");
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]

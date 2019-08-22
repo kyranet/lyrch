@@ -193,6 +193,7 @@ impl SettingsHandler for GuildSettingsHandler {
         }
     }
 
+    crate::apply_settings_insert!("guilds");
     crate::apply_settings_update!("guilds");
     crate::apply_settings_update_increase!("guilds");
 }

@@ -139,6 +139,7 @@ impl SettingsHandler for UserSettingsHandler {
         }
     }
 
+    crate::apply_settings_insert!("users");
     crate::apply_settings_update!("users");
     crate::apply_settings_update_increase!("users");
 }
