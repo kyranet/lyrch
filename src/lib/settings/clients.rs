@@ -1,6 +1,7 @@
 use super::SettingsHandler;
 use r2d2::Pool;
 use r2d2_postgres::PostgresConnectionManager;
+use serde::*;
 use serenity::model::prelude::*;
 use serenity::prelude::*;
 
@@ -34,7 +35,7 @@ impl SettingsHandler for ClientSettingsHandler {
     crate::apply_settings_update_increase!("clients");
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct ClientSettings {
     pub id: UserId,
     pub boosts_guild: Vec<i64>,

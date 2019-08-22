@@ -2,6 +2,7 @@ use super::SettingsHandler;
 use chrono::prelude::*;
 use r2d2::Pool;
 use r2d2_postgres::PostgresConnectionManager;
+use serde::*;
 use serenity::model::prelude::*;
 use serenity::prelude::*;
 use std::error::Error;
@@ -109,12 +110,40 @@ impl SettingsHandler for UserSettingsHandler {
         "
     );
 
-    crate::apply_settings_fetch!("users");
+    fn fetch(&self, id: impl AsRef<Self::Id>) -> Self::Output {
+        let connection = self.0.clone().get().unwrap();
+        let id = id.as_ref();
+        if let Ok(result) = connection.query("SELECT * FROM users WHERE id = $1", &[&(id.0 as i64)])
+        {
+            if !result.is_empty() {
+                let row = result.get(0);
+                return Self::Output {
+                    id: *id,
+                    banner_set: row.get(1),
+                    banner_list: row.get(2),
+                    badge_set: row.get(3),
+                    badge_list: row.get(4),
+                    color: row.get(5),
+                    money_count: row.get(6),
+                    point_count: row.get(7),
+                    reputation_count: row.get(8),
+                    next_daily: row.get(9),
+                    next_reputation: row.get(10),
+                };
+            }
+        }
+
+        Self::Output {
+            id: *id,
+            ..Self::Output::default()
+        }
+    }
+
     crate::apply_settings_update!("users");
     crate::apply_settings_update_increase!("users");
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct UserSettings {
     pub id: UserId,
     pub banner_set: Option<String>,
