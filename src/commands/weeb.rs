@@ -25,8 +25,15 @@ struct WeebSh {
     mime_type: String,
     account: String,
     hidden: bool,
-    tags: Vec<String>,
+    tags: Vec<WeebShTag>,
     url: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct WeebShTag {
+    user: String,
+    hidden: bool,
+    name: String,
 }
 
 lazy_static! {
