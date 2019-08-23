@@ -3,6 +3,7 @@ name = "lyrch"
 version = "0.1.0"
 authors = ["Antonio Román <kyradiscord@gmail.com>"]
 edition = "2018"
+build = "build.rs"
 
 [dependencies]
 bit-vec = "0.4.4"
@@ -23,3 +24,6 @@ serde = "1.0.99"
 serenity = "0.6.3"
 threadpool = "1.7.1"
 white_rabbit = "0.1.1"
+
+[build-dependencies]
+serde_json = "1.0.40"

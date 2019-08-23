@@ -1,0 +1,4 @@
+{
+    "PING": "Ping...",
+    "PONG": "Pong! Took: {latency}"
+}
