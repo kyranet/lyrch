@@ -1,7 +1,8 @@
-# Lyrch
+# Lyrch [![Discord](https://discordapp.com/api/guilds/254360814063058944/embed.png)](https://skyra.pw/join)
 
-This repository holds the private code for Experimental Skyra VI. Using, sharing, duplicating, or any other forms of
-redistribution of this code without permission is strictly forbidden.
+Skyra VI development repository. Feel free to go to [Skyra V]'s repository for the TypeScript version.
+
+[Skyra V]: https://github.com/kyranet/Skyra
 
 ## Development Requirements
 
