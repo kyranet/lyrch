@@ -1,0 +1,19 @@
+name: Rust Formatter
+
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+
+jobs:
+  rustfmt:
+    name: rustfmt
+    runs-on: ubuntu-latest
+    steps:
+    - name: rustfmt
+      uses: bltavares/actions/rustfmt@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        job-name: rustfmt
