@@ -41,11 +41,8 @@ clippy will be very slow, but afterwards it will run very, very, fast.
 
 ## NyProject Network
 
-- [`NeuLink`]: Game Artificial Intelligence Server, used for game commands, **this is not required for the basic set-up**.
-Requires [`.NET Core 3.0`].
-- [`Ryana`]: Image Rendering Generation Server, used for image commands, **this is not required for the basic set-up**.
-Requires [`.NET Core 3.0`].
+- [`LyCore`]: Game Artificial Intelligence and Image Rendering Generation Server, used for game commands, **this is not
+required for the basic set-up**. Requires [`.NET Core 3.0`].
 
-[`NeuLink`]: https://github.com/kyranet/neulink
-[`Ryana`]: https://github.com/kyranet/ryana
+[`LyCore`]: https://github.com/kyranet/LyCore
 [`.NET Core 3.0`]: https://dotnet.microsoft.com/download/dotnet-core/3.0
