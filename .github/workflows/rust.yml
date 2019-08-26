@@ -1,0 +1,52 @@
+name: Rust
+
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+
+jobs:
+  rustfmt:
+    name: rustfmt
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Install rustfmt
+      run: rustup component add rustfmt
+    - name: Run rustfmt
+      run: cargo fmt --all -- --check
+
+  clippy:
+    name: clippy
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Install clippy
+      run: rustup component add clippy
+    - name: Run clippy
+      run: cargo clippy --all
+
+  test:
+    name: Test ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+    steps:
+    - uses: actions/checkout@v1
+    - name: Install rust
+      shell: bash
+      run: |
+        if hash rustup 2>/dev/null; then
+          rustup update
+        else
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+          mv $HOME/.cargo/bin/* /usr/local/bin
+        fi
+    - name: Check rust version
+      run: rustc -Vv && cargo -V
+    - name: Build
+      run: cargo build --all --verbose
+    - name: Run tests
+      run: cargo test --all --verbose
