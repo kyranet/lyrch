@@ -13,7 +13,7 @@ use serenity::{
 group!({
 	name: "animal",
 	options: {},
-	commands: [catfact, dog, fox, shibe]
+	commands: [catfact, kitty, dog, fox, shibe]
 });
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -26,6 +26,11 @@ pub struct CatFactData {
 pub struct DogData {
     pub message: String,
     pub status: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct KittyData {
+    pub file: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -58,10 +63,30 @@ pub fn dog(ctx: &mut Context, msg: &Message) -> CommandResult {
         static ref CLIENT: reqwest::Client = reqwest::Client::new();
     }
 
-    let res: DogData = CLIENT.get("https://dog.ceo/api/breeds/image/random").send()?.json()?;
+    let res: DogData = CLIENT
+        .get("https://dog.ceo/api/breeds/image/random")
+        .send()?
+        .json()?;
 
     crate::try_send_message_embed!(ctx, msg, |e| {
         e.image(res.message);
+        e.timestamp(&msg.timestamp);
+        e.color(Colour::from_rgb(110, 136, 216))
+    })?;
+    Ok(())
+}
+
+#[command]
+#[only_in(guilds)]
+pub fn kitty(ctx: &mut Context, msg: &Message) -> CommandResult {
+    lazy_static! {
+        static ref CLIENT: reqwest::Client = reqwest::Client::new();
+    }
+
+    let res: KittyData = CLIENT.get("https://aws.random.cat/meow").send()?.json()?;
+
+    crate::try_send_message_embed!(ctx, msg, |e| {
+        e.image(res.file);
         e.timestamp(&msg.timestamp);
         e.color(Colour::from_rgb(110, 136, 216))
     })?;
@@ -92,7 +117,10 @@ pub fn shibe(ctx: &mut Context, msg: &Message) -> CommandResult {
         static ref CLIENT: reqwest::Client = reqwest::Client::new();
     }
 
-    let res: Vec<String> = CLIENT.get("http://shibe.online/api/shibes?count=1").send()?.json()?;
+    let res: Vec<String> = CLIENT
+        .get("http://shibe.online/api/shibes?count=1")
+        .send()?
+        .json()?;
 
     crate::try_send_message_embed!(ctx, msg, |e| {
         e.image(&res[0]);
