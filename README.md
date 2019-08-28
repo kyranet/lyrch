@@ -1,8 +1,10 @@
 # Lyrch [![Discord](https://discordapp.com/api/guilds/254360814063058944/embed.png)](https://skyra.pw/join)
 
-Skyra VI development repository. Feel free to go to [Skyra V]'s repository for the TypeScript version.
+Skyra VI development repository. Feel free to go to [Skyra V]'s repository for the TypeScript version. Furthermore you
+can track the development or know what you can work on, check out the [Trello Board].
 
 [Skyra V]: https://github.com/kyranet/Skyra
+[Trello Board]: https://trello.com/b/47BGAdZ3
 
 ## Development Requirements
 
