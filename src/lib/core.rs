@@ -115,10 +115,7 @@ pub fn configure(
         .on_mention(Some(bot_id))
         .no_dm_prefix(false)
         .case_insensitivity(false)
-        .prefix(
-            &env::var("PREFIX")
-                .expect("A prefix must be configured."),
-        )
+        .prefix(&env::var("PREFIX").expect("A prefix must be configured."))
         .dynamic_prefix(|ctx, msg| {
             if let Some(guild_id) = msg.guild_id {
                 let data = ctx.data.write();
