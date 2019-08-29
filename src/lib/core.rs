@@ -103,6 +103,7 @@ pub fn create_framework(owners: HashSet<UserId>, bot_id: UserId) -> StandardFram
         .group(&commands::social::SOCIAL_GROUP)
         .group(&commands::weeb::WEEB_GROUP)
         .group(&commands::misc::MISC_GROUP)
+        .group(&commands::fun::FUN_GROUP)
 }
 
 pub fn configure(
@@ -146,7 +147,7 @@ pub fn attach_data(client: &mut Client, framework: lib::framework::LyrchFramewor
     };
 
     if let Ok(amount) = env::var("THREADS")
-        .unwrap_or_("5".to_owned())
+        .unwrap_or_else(|_| "5".to_owned())
         .parse::<usize>()
     {
         client.threadpool.set_num_threads(amount);
