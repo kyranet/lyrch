@@ -99,10 +99,11 @@ pub fn create_framework(owners: HashSet<UserId>, bot_id: UserId) -> StandardFram
         // The `group!` macro generates `static` instances of the options set for the group.
         // They're made in the pattern: `#name_GROUP` for the group instance and `#name_GROUP_OPTIONS`.
         // #name is turned all uppercase
+        .group(&commands::animal::ANIMAL_GROUP)
         .group(&commands::general::GENERAL_GROUP)
+        .group(&commands::misc::MISC_GROUP)
         .group(&commands::social::SOCIAL_GROUP)
         .group(&commands::weeb::WEEB_GROUP)
-        .group(&commands::misc::MISC_GROUP)
 }
 
 pub fn configure(
