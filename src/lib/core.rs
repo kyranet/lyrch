@@ -115,9 +115,8 @@ pub fn configure(
         .no_dm_prefix(false)
         .case_insensitivity(false)
         .prefix(
-            env::var("PREFIX")
-                .expect("A prefix must be configured.")
-                .as_ref(),
+            &env::var("PREFIX")
+                .expect("A prefix must be configured."),
         )
         .dynamic_prefix(|ctx, msg| {
             if let Some(guild_id) = msg.guild_id {
@@ -147,7 +146,7 @@ pub fn attach_data(client: &mut Client, framework: lib::framework::LyrchFramewor
     };
 
     if let Ok(amount) = env::var("THREADS")
-        .unwrap_or_else(|_| "5".to_owned())
+        .unwrap_or_("5".to_owned())
         .parse::<usize>()
     {
         client.threadpool.set_num_threads(amount);

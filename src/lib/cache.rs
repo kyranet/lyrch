@@ -38,13 +38,10 @@ impl RedisConnection {
         let mut conn = self.0.clone().get().unwrap();
         redis::pipe()
             .atomic()
-            .add_command(redis::cmd("SET"))
-            .arg(key)
-            .arg(value)
-            .ignore()
-            .add_command(redis::cmd("EXPIRE"))
+            .add_command(redis::cmd("SETEX"))
             .arg(key)
             .arg(ttl)
+            .arg(value)
             .ignore()
             .execute(conn.deref_mut());
     }
