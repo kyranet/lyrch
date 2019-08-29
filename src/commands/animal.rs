@@ -42,11 +42,7 @@ pub struct FoxData {
 #[command]
 #[only_in(guilds)]
 pub fn catfact(ctx: &mut Context, msg: &Message) -> CommandResult {
-    lazy_static! {
-        static ref CLIENT: reqwest::Client = reqwest::Client::new();
-    }
-
-    let res: CatFactData = CLIENT.get("https://catfact.ninja/fact").send()?.json()?;
+    let res: CatFactData = reqwest::get("https://catfact.ninja/fact")?.json()?;
 
     crate::try_send_message_embed!(ctx, msg, |e| {
         e.title("Cat Fact");
@@ -59,14 +55,7 @@ pub fn catfact(ctx: &mut Context, msg: &Message) -> CommandResult {
 #[command]
 #[only_in(guilds)]
 pub fn dog(ctx: &mut Context, msg: &Message) -> CommandResult {
-    lazy_static! {
-        static ref CLIENT: reqwest::Client = reqwest::Client::new();
-    }
-
-    let res: DogData = CLIENT
-        .get("https://dog.ceo/api/breeds/image/random")
-        .send()?
-        .json()?;
+    let res: DogData = reqwest::get("https://dog.ceo/api/breeds/image/random")?.json()?;
 
     crate::try_send_message_embed!(ctx, msg, |e| {
         e.image(res.message);
@@ -79,11 +68,7 @@ pub fn dog(ctx: &mut Context, msg: &Message) -> CommandResult {
 #[command]
 #[only_in(guilds)]
 pub fn kitty(ctx: &mut Context, msg: &Message) -> CommandResult {
-    lazy_static! {
-        static ref CLIENT: reqwest::Client = reqwest::Client::new();
-    }
-
-    let res: KittyData = CLIENT.get("https://aws.random.cat/meow").send()?.json()?;
+    let res: KittyData = reqwest::get("https://aws.random.cat/meow")?.json()?;
 
     crate::try_send_message_embed!(ctx, msg, |e| {
         e.image(res.file);
@@ -96,11 +81,7 @@ pub fn kitty(ctx: &mut Context, msg: &Message) -> CommandResult {
 #[command]
 #[only_in(guilds)]
 pub fn fox(ctx: &mut Context, msg: &Message) -> CommandResult {
-    lazy_static! {
-        static ref CLIENT: reqwest::Client = reqwest::Client::new();
-    }
-
-    let res: FoxData = CLIENT.get("https://randomfox.ca/floof").send()?.json()?;
+    let res: FoxData = reqwest::get("https://randomfox.ca/floof")?.json()?;
 
     crate::try_send_message_embed!(ctx, msg, |e| {
         e.image(res.image);
@@ -113,14 +94,7 @@ pub fn fox(ctx: &mut Context, msg: &Message) -> CommandResult {
 #[command]
 #[only_in(guilds)]
 pub fn shibe(ctx: &mut Context, msg: &Message) -> CommandResult {
-    lazy_static! {
-        static ref CLIENT: reqwest::Client = reqwest::Client::new();
-    }
-
-    let res: Vec<String> = CLIENT
-        .get("http://shibe.online/api/shibes?count=1")
-        .send()?
-        .json()?;
+    let res: Vec<String> = reqwest::get("http://shibe.online/api/shibes?count=1")?.json()?;
 
     crate::try_send_message_embed!(ctx, msg, |e| {
         e.image(&res[0]);
