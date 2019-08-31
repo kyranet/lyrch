@@ -101,6 +101,7 @@ pub fn create_framework(owners: HashSet<UserId>, bot_id: UserId) -> StandardFram
         // #name is turned all uppercase
         .group(&commands::animal::ANIMAL_GROUP)
         .group(&commands::general::GENERAL_GROUP)
+        .group(&commands::manga::MANGA_GROUP)
         .group(&commands::misc::MISC_GROUP)
         .group(&commands::social::SOCIAL_GROUP)
         .group(&commands::weeb::WEEB_GROUP)
