@@ -21,7 +21,6 @@ group!({
 pub fn manga(ctx: &mut Context, msg: &Message, mut args: Args) -> CommandResult {
     // Get the name of the manga they want to use or set it to 0 if none provided
     let name = args.single().unwrap_or(String::from("---"));
-    println!("{:?}", name);
     // If there was no name provided cancel out
     if name == "---" {
         try_send_message_content!(ctx, msg, "You did not provide a manga name. Please make sure to replace all `spaces` inside a name with `-`. For example: `One Piece` should be done as `!manga one-piece`")?;
