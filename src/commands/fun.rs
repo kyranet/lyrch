@@ -13,6 +13,7 @@ group!({
 });
 
 #[command]
+#[aliases("choice")]
 #[delimiters(",", ", ")]
 pub fn choose(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {
     let options = args.raw().collect::<Vec<&str>>();
