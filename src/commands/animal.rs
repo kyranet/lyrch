@@ -40,7 +40,6 @@ pub struct FoxData {
 }
 
 #[command]
-#[only_in(guilds)]
 pub fn catfact(ctx: &mut Context, msg: &Message) -> CommandResult {
     let res: CatFactData = reqwest::get("https://catfact.ninja/fact")?.json()?;
 
@@ -53,7 +52,6 @@ pub fn catfact(ctx: &mut Context, msg: &Message) -> CommandResult {
 }
 
 #[command]
-#[only_in(guilds)]
 pub fn dog(ctx: &mut Context, msg: &Message) -> CommandResult {
     let res: DogData = reqwest::get("https://dog.ceo/api/breeds/image/random")?.json()?;
 
@@ -66,7 +64,6 @@ pub fn dog(ctx: &mut Context, msg: &Message) -> CommandResult {
 }
 
 #[command]
-#[only_in(guilds)]
 pub fn kitty(ctx: &mut Context, msg: &Message) -> CommandResult {
     let res: KittyData = reqwest::get("https://aws.random.cat/meow")?.json()?;
 
@@ -79,7 +76,6 @@ pub fn kitty(ctx: &mut Context, msg: &Message) -> CommandResult {
 }
 
 #[command]
-#[only_in(guilds)]
 pub fn fox(ctx: &mut Context, msg: &Message) -> CommandResult {
     let res: FoxData = reqwest::get("https://randomfox.ca/floof")?.json()?;
 
@@ -92,7 +88,6 @@ pub fn fox(ctx: &mut Context, msg: &Message) -> CommandResult {
 }
 
 #[command]
-#[only_in(guilds)]
 pub fn shibe(ctx: &mut Context, msg: &Message) -> CommandResult {
     let res: Vec<String> = reqwest::get("http://shibe.online/api/shibes?count=1")?.json()?;
 
