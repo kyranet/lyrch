@@ -1,9 +1,5 @@
-use crate::lib::settings::users::UserSettingsHandler;
-use crate::lib::settings::SettingsHandler;
-use crate::lib::util::bucket::{Bucket, Ratelimit};
+use crate::prelude::*;
 use lazy_static;
-use serenity::model::prelude::*;
-use serenity::prelude::*;
 use std::collections::HashMap;
 
 pub fn social_points(ctx: &mut Context, msg: &Message) -> bool {

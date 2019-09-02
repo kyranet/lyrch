@@ -1,15 +1,7 @@
-use crate::lib::internal::ScheduleId;
-use crate::lib::schedule::SchedulerKey;
-use crate::lib::settings::reminders::RemindersSettingsHandler;
-use crate::lib::settings::SettingsHandler;
-use crate::try_send_message_content;
-use serenity::{
-    framework::standard::{
-        macros::{command, group},
-        Args, CommandResult,
-    },
-    model::prelude::*,
-    prelude::*,
+use crate::prelude::*;
+use serenity::framework::standard::{
+    macros::{command, group},
+    Args, CommandResult,
 };
 use white_rabbit::{DateResult, Duration};
 

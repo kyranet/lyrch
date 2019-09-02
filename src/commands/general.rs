@@ -1,15 +1,10 @@
-use crate::try_send_message_content;
-use serenity::{
-    framework::standard::{
-        help_commands,
-        macros::{command, group, help},
-        Args, CommandGroup, CommandResult, HelpOptions,
-    },
-    model::{channel::Message, id::UserId},
+use crate::prelude::*;
+use serenity::framework::standard::{
+    help_commands,
+    macros::{command, group, help},
+    Args, CommandGroup, CommandResult, HelpOptions,
 };
 use std::collections::HashSet;
-
-use serenity::prelude::*;
 
 group!({
     name: "general",

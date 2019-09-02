@@ -17,6 +17,7 @@ extern crate lazy_static;
 mod commands;
 mod lib;
 mod monitors;
+mod prelude;
 mod tasks;
 // mod i18n;
 

@@ -1,15 +1,7 @@
-use crate::lib::cache::RedisConnection;
-use crate::lib::settings::users::UserSettingsHandler;
-use crate::lib::settings::SettingsHandler;
-use crate::lib::util::{percentage, resolvers::resolve_user};
-use crate::try_ctx_send_message_content;
-use serenity::prelude::*;
-use serenity::{
-    framework::standard::{
-        macros::{command, group},
-        Args, CommandResult,
-    },
-    model::channel::Message,
+use crate::prelude::*;
+use serenity::framework::standard::{
+    macros::{command, group},
+    Args, CommandResult,
 };
 
 const SHINY: &str = "<:shiny:612364146792726539>";
