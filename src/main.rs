@@ -6,7 +6,7 @@ mod lib;
 mod monitors;
 mod prelude;
 mod tasks;
-// mod i18n;
+mod i18n;
 
 use lib::core::{attach_data, create_framework, fetch_application_data, initialize_client};
 

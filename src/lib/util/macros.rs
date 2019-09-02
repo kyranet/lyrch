@@ -125,3 +125,33 @@ macro_rules! try_send_message_embed {
         $crate::try_command!($crate::send_message_embed!($ctx, $msg, $f))
     };
 }
+
+#[macro_export]
+macro_rules! language_get {
+    ($ctx:expr, $msg:expr) => {{
+        let data = $ctx.data.read();
+
+        if let Some(guild) = $msg.guild_id {
+            let guilds = data
+                .get::<crate::lib::settings::guilds::GuildSettingsHandler>()
+                .expect("Expected GuildSettingsHandler in ShareMap.");
+            if let Some(guild_settings) = guilds.get(guild) {
+                guild_settings.language.clone()
+            } else {
+                "en_us".to_owned()
+            }
+        } else {
+            "en_us".to_owned()
+        }
+    }};
+}
+
+#[macro_export]
+macro_rules! language_use {
+    ($language:expr, $key:ident) => {
+        crate::i18n::OUTPUT.get(&$language).unwrap().$key()
+    };
+    ($language:expr, $key:ident, $($args:expr)*) => {
+        crate::i18n::OUTPUT.get(&$language).unwrap().$key($(&$args)*)
+    };
+}
