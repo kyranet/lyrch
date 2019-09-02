@@ -36,16 +36,11 @@ impl RedisConnection {
         K: redis::ToRedisArgs + Copy,
     {
         let mut conn = self.0.clone().get().unwrap();
-        redis::pipe()
-            .atomic()
-            .add_command(redis::cmd("SET"))
+        redis::cmd("SET")
             .arg(key)
             .arg(value)
-            .ignore()
-            .add_command(redis::cmd("EXPIRE"))
-            .arg(key)
+            .arg("EX")
             .arg(ttl)
-            .ignore()
             .execute(conn.deref_mut());
     }
 }
