@@ -96,9 +96,11 @@ fn process_json_entry_file(languages: Vec<String>) -> std::io::Result<()> {
     let _ = writeln!(&mut fields, "}}");
     let _ = writeln!(&mut impls, "}}");
 
-
     let mut definition_file = {
-        let path = Path::new(".").join("src").join("i18n").join("definition.rs");
+        let path = Path::new(".")
+            .join("src")
+            .join("i18n")
+            .join("definition.rs");
         fs::OpenOptions::new()
             .read(false)
             .write(true)
@@ -129,7 +131,13 @@ fn process_json_entry_file(languages: Vec<String>) -> std::io::Result<()> {
     let _ = file.write(b"lazy_static! {");
     let _ = file.write(b"\n    pub static ref OUTPUT: HashMap<String, definition::Language> = HashMap::from_iter(vec![");
     for language in languages.iter() {
-        let _ = file.write(format!("\n        (\"{0}\".to_owned(), self::{0}::OUTPUT),", language).as_bytes());
+        let _ = file.write(
+            format!(
+                "\n        (\"{0}\".to_owned(), self::{0}::OUTPUT),",
+                language
+            )
+            .as_bytes(),
+        );
     }
     let _ = file.write(b"\n    ].into_iter());\n");
     let _ = file.write(b"}");
