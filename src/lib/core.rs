@@ -104,6 +104,7 @@ pub fn create_framework(owners: HashSet<UserId>, bot_id: UserId) -> StandardFram
         .group(&commands::misc::MISC_GROUP)
         .group(&commands::social::SOCIAL_GROUP)
         .group(&commands::weeb::WEEB_GROUP)
+        .group(&commands::fun::FUN_GROUP)
 }
 
 pub fn configure(

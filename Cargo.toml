@@ -12,6 +12,7 @@ chrono = "0.4.8"
 dotenv = "0.14.1"
 hey_listen = "0.4.0"
 lazy_static = "1.4.0"
+rand = "0.7.0"
 postgres = { version = "0.15.2", features = ["with-chrono", "with-bit-vec", "with-serde_json"] }
 r2d2 = "0.8.5"
 r2d2_postgres = "0.14.0"
