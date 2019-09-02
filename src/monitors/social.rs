@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use lazy_static;
 use std::collections::HashMap;
 
 pub fn social_points(ctx: &mut Context, msg: &Message) -> bool {
