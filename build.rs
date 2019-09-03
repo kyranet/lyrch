@@ -55,14 +55,12 @@ fn process_json_entry_file(languages: Vec<String>) -> std::io::Result<()> {
     let reader = BufReader::new(file);
     let map: HashMap<String, Vec<String>> = serde_json::from_reader(reader).unwrap();
 
-    let mut fields = "".to_owned();
-    let _ = writeln!(&mut fields, "\npub struct Language {{\n");
-
     let mut imports = "pub mod definition;\n".to_owned();
     for language in languages.iter() {
         let _ = writeln!(&mut imports, "pub mod {};", language);
     }
 
+    let mut fields = "pub struct Language {\n".to_owned();
     let mut impls = "impl Language {\n".to_owned();
     for (key, params) in map.iter() {
         let key = key.to_lowercase();

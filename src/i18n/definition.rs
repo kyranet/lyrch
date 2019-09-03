@@ -1,6 +1,4 @@
-
 pub struct Language {
-
     pub ping: &'static str,
     pub pong: &'static str,
 }
