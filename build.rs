@@ -127,18 +127,23 @@ fn process_json_entry_file(languages: Vec<String>) -> std::io::Result<()> {
     let _ = file.write(b"use std::iter::FromIterator;\n");
 
     let _ = file.write(b"lazy_static! {");
-    let _ = file.write(b"\n    pub static ref OUTPUT: HashMap<String, definition::Language> = HashMap::from_iter(vec![");
+    let _ = file.write(
+        b"\n    pub static ref OUTPUT: HashMap<String, definition::Language> = HashMap::from_iter(",
+    );
+    let _ = file.write(b"\n        vec![");
     for language in languages.iter() {
         let _ = file.write(
             format!(
-                "\n        (\"{0}\".to_owned(), self::{0}::OUTPUT),",
+                "\n            (\"{0}\".to_owned(), self::{0}::OUTPUT),",
                 language
             )
             .as_bytes(),
         );
     }
-    let _ = file.write(b"\n    ].into_iter());\n");
-    let _ = file.write(b"}");
+    let _ = file.write(b"\n        ]");
+    let _ = file.write(b"\n        .into_iter()");
+    let _ = file.write(b"\n    );");
+    let _ = file.write(b"\n}\n");
     Ok(())
 }
 

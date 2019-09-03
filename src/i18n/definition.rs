@@ -8,7 +8,6 @@ impl Language {
         self.ping.to_owned()
     }
     pub fn pong(&self, latency: &str) -> String {
-        self.pong.to_owned()
-            .replace("{latency}", latency)
+        self.pong.to_owned().replace("{latency}", latency)
     }
 }
