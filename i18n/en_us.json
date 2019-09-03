@@ -1,4 +1,5 @@
 {
     "PING": "Ping...",
-    "PONG": "Pong! I took {latency} milliseconds!"
+    "PONG": "Pong! I took {latency} milliseconds!",
+    "ABOUT": "Skyra 6.0.0 Lyrch is a multi-purpose Discord Bot designed to run the majority of tasks with a great performance and constant 24/7 uptime.\nShe is built on top of Serenity, a lightning fast Discord library.\n\nSkyra features:\n• Advanced Moderation with temporary actions included\n• Announcement management\n• Fully configurable\n• Message logs, member logs, and mod logs\n• Multilingual\n• Profiles and levels, with leaderboards and social management\n• Role management\n• Weeb commands (+50)!\nAnd more!"
 }

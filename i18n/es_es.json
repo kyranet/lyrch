@@ -1,4 +1,5 @@
 {
 	"PING": "Ping...",
-	"PONG": "¡Pong! ¡Tardé {latency} milisegundos!"
+	"PONG": "¡Pong! ¡Tardé {latency} milisegundos!",
+	"ABOUT": "Skyra 6.0.0 Lyrch es un bot multi-propósito diseñado para llevar a cabo la mayoría de las tareas con un rendimiento enorme y una actividad 24/7.\nElla está escrita sobre Serenity, una librería muy rápida para Discord.\n\nSkyra tiene:\n• Moderación avanzada con acciones temporales\n• Administración de anuncios\n• Completamente configurable\n• Registro de mensajes, de miembros y de moderación\n• Multilenguaje\n• Perfiles y niveles, con sistema de ránking y administración social\n• Administración de roles\n• Comandos de anime (+50)!\n¡Y más!"
 }

@@ -23,7 +23,7 @@ pub fn ping(ctx: &mut Context, msg: &Message) -> CommandResult {
 
 #[command]
 pub fn about(ctx: &mut Context, msg: &Message) -> CommandResult {
-    try_send_message_content!(ctx, msg, "This is a small test-bot! :)")?;
+    try_send_message_i18n!(ctx, msg, about)?;
     Ok(())
 }
 
