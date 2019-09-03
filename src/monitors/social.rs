@@ -12,7 +12,7 @@ pub fn social_points(ctx: &mut Context, msg: &Message) -> bool {
         });
     }
 
-    if SOCIAL_POINTS_BUCKET.lock().take(msg.author.id.0) == 0 {
+    if !msg.author.bot && SOCIAL_POINTS_BUCKET.lock().take(msg.author.id.0) == 0 {
         let data = ctx.data.read();
         let settings = data.get::<UserSettingsHandler>().unwrap();
         if let Err(err) = settings.update_increase(msg.author.id, "point_count", &5) {
