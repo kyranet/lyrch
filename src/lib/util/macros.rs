@@ -103,12 +103,34 @@ macro_rules! send_message_content {
 }
 
 #[macro_export]
+macro_rules! send_message_i18n {
+    ($ctx:expr, $msg:expr, $key:ident) => {{
+        let language = $crate::language_get!($ctx, $msg);
+        $crate::send_message_content!($ctx, $msg, $crate::language_use!(language, $key))
+    }};
+    ($ctx:expr, $msg:expr, $key:ident, $($args:expr)*) => {{
+        let language = $crate::language_get!($ctx, $msg);
+        $crate::send_message_content!($ctx, $msg, $crate::language_use!(language, $key, $($args)*))
+    }};
+}
+
+#[macro_export]
 macro_rules! try_send_message_content {
     ($ctx:expr, $msg:expr, $content:expr) => {
         $crate::try_command!($crate::send_message_content!($ctx, $msg, $content))
     };
     ($ctx:expr, $msg:expr, $content:expr, $($args:tt)*) => {
         $crate::try_command!($crate::send_message_content!($ctx, $msg, $content, $($args)*))
+    };
+}
+
+#[macro_export]
+macro_rules! try_send_message_i18n {
+    ($ctx:expr, $msg:expr, $key:ident) => {
+        $crate::try_command!($crate::send_message_i18n!($ctx, $msg, $key))
+    };
+    ($ctx:expr, $msg:expr, $key:ident, $($args:expr)*) => {
+        $crate::try_command!($crate::send_message_i18n!($ctx, $msg, $key, $($args)*))
     };
 }
 
@@ -129,9 +151,8 @@ macro_rules! try_send_message_embed {
 #[macro_export]
 macro_rules! language_get {
     ($ctx:expr, $msg:expr) => {{
-        let data = $ctx.data.read();
-
         if let Some(guild) = $msg.guild_id {
+            let data = $ctx.data.read();
             let guilds = data
                 .get::<crate::lib::settings::guilds::GuildSettingsHandler>()
                 .expect("Expected GuildSettingsHandler in ShareMap.");

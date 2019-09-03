@@ -15,10 +15,9 @@ group!({
 #[command]
 #[only_in(guilds)]
 pub fn ping(ctx: &mut Context, msg: &Message) -> CommandResult {
-    let language = language_get!(ctx, msg);
-    let response = try_send_message_content!(ctx, msg, language_use!(language, ping))?;
+    let response = try_send_message_i18n!(ctx, msg, ping)?;
     let latency = (response.timestamp - msg.timestamp).num_milliseconds();
-    try_send_message_content!(ctx, msg, language_use!(language, pong, latency.to_string()))?;
+    try_send_message_i18n!(ctx, msg, pong, latency.to_string())?;
     Ok(())
 }
 
