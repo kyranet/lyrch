@@ -29,7 +29,7 @@ jobs:
       run: cargo test --all --verbose
     - name: Install rustfmt and clippy
       run: rustup component add rustfmt clippy
-    - name: Run rustfmt
-      run: cargo fmt --all -- --check
     - name: Run clippy
       run: cargo clippy --all
+    - name: Run rustfmt
+      run: cargo fmt --all -- --check
