@@ -9,7 +9,7 @@ on:
 jobs:
   rustfmt:
     name: rustfmt
-    runs-on: ubuntu-latest
+    runs-on: macOS-latest
     steps:
     - uses: actions/checkout@v1
     - name: Install rustfmt
@@ -19,7 +19,7 @@ jobs:
 
   clippy:
     name: clippy
-    runs-on: ubuntu-latest
+    runs-on: macOS-latest
     steps:
     - uses: actions/checkout@v1
     - name: Install clippy
@@ -28,11 +28,8 @@ jobs:
       run: cargo clippy --all
 
   test:
-    name: Test ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest]
+    name: Test Build
+    runs-on: macOS-latest
     steps:
     - uses: actions/checkout@v1
     - name: Install rust
