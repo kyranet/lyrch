@@ -107,6 +107,7 @@ fn process_json_entry_file(languages: Vec<String>) -> std::io::Result<()> {
             .open(path)
             .unwrap()
     };
+    let _ = definition_file.write(b"#![rustfmt::skip]\n\n");
     let _ = definition_file.write(fields.as_bytes());
     let _ = definition_file.write(b"\n");
     let _ = definition_file.write(impls.as_bytes());
@@ -121,6 +122,7 @@ fn process_json_entry_file(languages: Vec<String>) -> std::io::Result<()> {
             .open(path)
             .unwrap()
     };
+    let _ = file.write(b"#![rustfmt::skip]\n\n");
     let _ = file.write(imports.as_bytes());
     let _ = file.write(b"\n");
     let _ = file.write(b"use std::collections::HashMap;\n");
