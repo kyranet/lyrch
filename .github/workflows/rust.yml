@@ -24,7 +24,7 @@ jobs:
     - name: install rustfmt
       run: rustup component add rustfmt
     - name: check rustfmt version
-      run: cargo rustfmt --version
+      run: cargo fmt --version
     - name: run rustfmt
       run: cargo fmt --all -- --check
 
